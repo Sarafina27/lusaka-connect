@@ -9,9 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VenuesRouteImport } from './routes/venues'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as PayoutsRouteImport } from './routes/payouts'
+import { Route as OrganizersRouteImport } from './routes/organizers'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as EventsPrivateRouteImport } from './routes/events/private'
+import { Route as EventsNightlifeRouteImport } from './routes/events/nightlife'
+import { Route as EventsConcertsRouteImport } from './routes/events/concerts'
+import { Route as EventsChillRouteImport } from './routes/events/chill'
 
+const VenuesRoute = VenuesRouteImport.update({
+  id: '/venues',
+  path: '/venues',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PayoutsRoute = PayoutsRouteImport.update({
+  id: '/payouts',
+  path: '/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizersRoute = OrganizersRouteImport.update({
+  id: '/organizers',
+  path: '/organizers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -22,35 +69,193 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EventsRoute,
+} as any)
+const EventsPrivateRoute = EventsPrivateRouteImport.update({
+  id: '/private',
+  path: '/private',
+  getParentRoute: () => EventsRoute,
+} as any)
+const EventsNightlifeRoute = EventsNightlifeRouteImport.update({
+  id: '/nightlife',
+  path: '/nightlife',
+  getParentRoute: () => EventsRoute,
+} as any)
+const EventsConcertsRoute = EventsConcertsRouteImport.update({
+  id: '/concerts',
+  path: '/concerts',
+  getParentRoute: () => EventsRoute,
+} as any)
+const EventsChillRoute = EventsChillRouteImport.update({
+  id: '/chill',
+  path: '/chill',
+  getParentRoute: () => EventsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/checkout': typeof CheckoutRoute
+  '/events': typeof EventsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/organizers': typeof OrganizersRoute
+  '/payouts': typeof PayoutsRoute
+  '/signup': typeof SignupRoute
+  '/venues': typeof VenuesRoute
+  '/events/chill': typeof EventsChillRoute
+  '/events/concerts': typeof EventsConcertsRoute
+  '/events/nightlife': typeof EventsNightlifeRoute
+  '/events/private': typeof EventsPrivateRoute
+  '/events/': typeof EventsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/checkout': typeof CheckoutRoute
+  '/login': typeof LoginRoute
+  '/organizers': typeof OrganizersRoute
+  '/payouts': typeof PayoutsRoute
+  '/signup': typeof SignupRoute
+  '/venues': typeof VenuesRoute
+  '/events/chill': typeof EventsChillRoute
+  '/events/concerts': typeof EventsConcertsRoute
+  '/events/nightlife': typeof EventsNightlifeRoute
+  '/events/private': typeof EventsPrivateRoute
+  '/events': typeof EventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/checkout': typeof CheckoutRoute
+  '/events': typeof EventsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/organizers': typeof OrganizersRoute
+  '/payouts': typeof PayoutsRoute
+  '/signup': typeof SignupRoute
+  '/venues': typeof VenuesRoute
+  '/events/chill': typeof EventsChillRoute
+  '/events/concerts': typeof EventsConcertsRoute
+  '/events/nightlife': typeof EventsNightlifeRoute
+  '/events/private': typeof EventsPrivateRoute
+  '/events/': typeof EventsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/checkout'
+    | '/events'
+    | '/login'
+    | '/organizers'
+    | '/payouts'
+    | '/signup'
+    | '/venues'
+    | '/events/chill'
+    | '/events/concerts'
+    | '/events/nightlife'
+    | '/events/private'
+    | '/events/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar'
-  id: '__root__' | '/' | '/calendar'
+  to:
+    | '/'
+    | '/calendar'
+    | '/checkout'
+    | '/login'
+    | '/organizers'
+    | '/payouts'
+    | '/signup'
+    | '/venues'
+    | '/events/chill'
+    | '/events/concerts'
+    | '/events/nightlife'
+    | '/events/private'
+    | '/events'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/checkout'
+    | '/events'
+    | '/login'
+    | '/organizers'
+    | '/payouts'
+    | '/signup'
+    | '/venues'
+    | '/events/chill'
+    | '/events/concerts'
+    | '/events/nightlife'
+    | '/events/private'
+    | '/events/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
+  CheckoutRoute: typeof CheckoutRoute
+  EventsRoute: typeof EventsRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  OrganizersRoute: typeof OrganizersRoute
+  PayoutsRoute: typeof PayoutsRoute
+  SignupRoute: typeof SignupRoute
+  VenuesRoute: typeof VenuesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/venues': {
+      id: '/venues'
+      path: '/venues'
+      fullPath: '/venues'
+      preLoaderRoute: typeof VenuesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payouts': {
+      id: '/payouts'
+      path: '/payouts'
+      fullPath: '/payouts'
+      preLoaderRoute: typeof PayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizers': {
+      id: '/organizers'
+      path: '/organizers'
+      fullPath: '/organizers'
+      preLoaderRoute: typeof OrganizersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -65,13 +270,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof EventsRoute
+    }
+    '/events/private': {
+      id: '/events/private'
+      path: '/private'
+      fullPath: '/events/private'
+      preLoaderRoute: typeof EventsPrivateRouteImport
+      parentRoute: typeof EventsRoute
+    }
+    '/events/nightlife': {
+      id: '/events/nightlife'
+      path: '/nightlife'
+      fullPath: '/events/nightlife'
+      preLoaderRoute: typeof EventsNightlifeRouteImport
+      parentRoute: typeof EventsRoute
+    }
+    '/events/concerts': {
+      id: '/events/concerts'
+      path: '/concerts'
+      fullPath: '/events/concerts'
+      preLoaderRoute: typeof EventsConcertsRouteImport
+      parentRoute: typeof EventsRoute
+    }
+    '/events/chill': {
+      id: '/events/chill'
+      path: '/chill'
+      fullPath: '/events/chill'
+      preLoaderRoute: typeof EventsChillRouteImport
+      parentRoute: typeof EventsRoute
+    }
   }
 }
+
+interface EventsRouteChildren {
+  EventsChillRoute: typeof EventsChillRoute
+  EventsConcertsRoute: typeof EventsConcertsRoute
+  EventsNightlifeRoute: typeof EventsNightlifeRoute
+  EventsPrivateRoute: typeof EventsPrivateRoute
+  EventsIndexRoute: typeof EventsIndexRoute
+}
+
+const EventsRouteChildren: EventsRouteChildren = {
+  EventsChillRoute: EventsChillRoute,
+  EventsConcertsRoute: EventsConcertsRoute,
+  EventsNightlifeRoute: EventsNightlifeRoute,
+  EventsPrivateRoute: EventsPrivateRoute,
+  EventsIndexRoute: EventsIndexRoute,
+}
+
+const EventsRouteWithChildren =
+  EventsRoute._addFileChildren(EventsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
+  CheckoutRoute: CheckoutRoute,
+  EventsRoute: EventsRouteWithChildren,
+  LoginRoute: LoginRoute,
+  OrganizersRoute: OrganizersRoute,
+  PayoutsRoute: PayoutsRoute,
+  SignupRoute: SignupRoute,
+  VenuesRoute: VenuesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

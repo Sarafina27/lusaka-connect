@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { Minus, Plus, X } from "lucide-react";
 import eventWarehouse from "@/assets/event-warehouse.jpg";
 import eventSunset from "@/assets/event-sunset.jpg";
 import eventConcert from "@/assets/event-concert.jpg";
@@ -22,6 +24,8 @@ type Event = {
   price: string;
   badge: string;
   image: string;
+  description?: string;
+  time?: string;
 };
 
 const trendingEvents: Event[] = [
@@ -32,6 +36,7 @@ const trendingEvents: Event[] = [
     price: "ZMW 150",
     badge: "MoMo Accepted",
     image: eventWarehouse,
+    description: "High-energy warehouse sessions with electronic beats and live performers. Perfect for an unforgettable night.",
   },
   {
     title: "Sunset Soirée at Latitude",
@@ -40,6 +45,7 @@ const trendingEvents: Event[] = [
     price: "ZMW 450",
     badge: "Limited Tickets",
     image: eventSunset,
+    description: "Elegant sunset experience with cocktails, live music, and breathtaking views of Lusaka.",
   },
   {
     title: "Echoes of the Copperbelt",
@@ -48,6 +54,7 @@ const trendingEvents: Event[] = [
     price: "ZMW 200",
     badge: "Verified Organizer",
     image: eventConcert,
+    description: "Celebrating the sounds and culture of Zambia's mining region with live performances.",
   },
 ];
 
@@ -60,19 +67,19 @@ function Nav() {
             Kuwala
           </span>
           <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#events" className="text-foreground transition-colors">Events</a>
-            <a href="#venues" className="hover:text-foreground transition-colors">Venues</a>
-            <a href="#liquor" className="hover:text-foreground transition-colors">Liquor Stores</a>
-            <a href="#organizers" className="hover:text-foreground transition-colors">Organizers</a>
+            <Link to="/events" className="text-foreground transition-colors">Events</Link>
+            <Link to="/venues" className="hover:text-foreground transition-colors">Venues</Link>
+            <Link to="/venues" className="hover:text-foreground transition-colors">Liquor Stores</Link>
+            <Link to="/organizers" className="hover:text-foreground transition-colors">Organizers</Link>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors">
+          <Link to="/login" className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors">
             Organizer Login
-          </button>
-          <button className="text-sm font-semibold px-5 py-2 rounded-full bg-foreground text-background hover:bg-accent hover:text-accent-foreground transition-colors">
+          </Link>
+          <Link to="/signup" className="text-sm font-semibold px-5 py-2 rounded-full bg-foreground text-background hover:bg-accent hover:text-accent-foreground transition-colors">
             Sign Up
-          </button>
+          </Link>
         </div>
       </div>
     </nav>
@@ -134,7 +141,119 @@ function Hero() {
   );
 }
 
-function TrendingEvents() {
+function EventDetailModal({
+  event,
+  quantity,
+  onQuantityChange,
+  onClose,
+  onCheckout,
+}: {
+  event: Event | null;
+  quantity: number;
+  onQuantityChange: (q: number) => void;
+  onClose: () => void;
+  onCheckout: () => void;
+}) {
+  if (!event) return null;
+
+  const totalPrice = parseInt(event.price.replace(/\D/g, "")) * quantity;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        className="bg-background border border-border rounded-2xl max-w-2xl w-full overflow-hidden"
+      >
+        <div className="grid md:grid-cols-2 gap-6 p-6">
+          {/* Image */}
+          <div className="relative aspect-square rounded-xl overflow-hidden">
+            <img
+              src={event.image}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+            <button
+              onClick={onClose}
+              className="absolute top-3 right-3 bg-background/80 backdrop-blur rounded-full p-2 hover:bg-background transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Details */}
+          <div className="flex flex-col justify-between">
+            <div>
+              <div className="inline-block mb-3">
+                <span className="bg-accent/15 text-accent text-xs font-mono px-2 py-1 rounded">
+                  {event.badge.toUpperCase()}
+                </span>
+              </div>
+              <h2 className="text-3xl font-extrabold mb-2">{event.title}</h2>
+              <p className="text-muted-foreground text-sm mb-4">{event.when}</p>
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                {event.description || "Experience an unforgettable night in Lusaka."}
+              </p>
+
+              <div className="bg-card/50 border border-border rounded-xl p-4 mb-6">
+                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wide mb-1">Location</p>
+                <p className="font-semibold text-lg">{event.venue}</p>
+              </div>
+            </div>
+
+            {/* Ticket selection & checkout */}
+            <div>
+              <div className="flex items-center justify-between mb-4 p-4 bg-card/50 rounded-xl border border-border">
+                <span className="text-sm font-medium">Tickets</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
+                    className="rounded-full p-2 bg-accent/10 hover:bg-accent/20 transition-colors"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="text-xl font-bold w-8 text-center">{quantity}</span>
+                  <button
+                    onClick={() => onQuantityChange(quantity + 1)}
+                    className="rounded-full p-2 bg-accent/10 hover:bg-accent/20 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2 mb-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Price per ticket</span>
+                  <span>{event.price}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg border-t border-border pt-2">
+                  <span>Total</span>
+                  <span className="text-accent">ZMW {totalPrice.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={onCheckout}
+                className="w-full py-3 bg-foreground text-background rounded-full font-bold hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function TrendingEvents({
+  onEventClick,
+}: {
+  onEventClick: (event: Event) => void;
+}) {
   return (
     <section id="events" className="py-12 bg-white/[0.02] border-y border-border">
       <div className="max-w-7xl mx-auto px-6">
@@ -143,9 +262,9 @@ function TrendingEvents() {
           className="flex justify-between items-end mb-10"
         >
           <h2 className="text-3xl font-extrabold tracking-tight">Trending Events</h2>
-          <a href="#" className="text-sm font-mono text-accent hover:underline underline-offset-4">
+          <Link to="/events" className="text-sm font-mono text-accent hover:underline underline-offset-4">
             View All →
-          </a>
+          </Link>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -157,6 +276,7 @@ function TrendingEvents() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4 }}
+              onClick={() => onEventClick(e)}
               className="group cursor-pointer"
             >
               <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-4 ring-1 ring-white/10">
@@ -252,9 +372,9 @@ function LiquorAndVenues() {
               <p className="text-xs text-muted-foreground">12+ venues recently added</p>
             </div>
           </div>
-          <button className="mt-8 w-full py-4 bg-foreground text-background rounded-xl font-bold hover:bg-accent hover:text-accent-foreground transition-colors">
+          <Link to="/venues" className="mt-8 w-full py-4 bg-foreground text-background rounded-xl font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
             Browse Venues from ZMW 1,200 / night
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>
@@ -312,12 +432,12 @@ function CTA() {
           Real analytics. Built for Zambian organizers.
         </motion.p>
         <motion.div {...fadeUp} className="flex flex-wrap gap-3 justify-center">
-          <button className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold hover:bg-accent hover:text-accent-foreground transition-colors">
+          <Link to="/organizers" className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
             Create Organizer Account
-          </button>
-          <button className="px-6 py-3 rounded-full border border-border text-sm font-medium hover:bg-white/5 transition-colors">
+          </Link>
+          <Link to="/payouts" className="px-6 py-3 rounded-full border border-border text-sm font-medium text-center hover:bg-white/5 transition-colors">
             How payouts work
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>
@@ -369,15 +489,44 @@ function Footer() {
 }
 
 function Index() {
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (selectedEvent) {
+      const ticketPrice = parseInt(selectedEvent.price.replace(/\D/g, ""));
+      navigate({
+        to: "/checkout",
+        search: {
+          event: selectedEvent.title,
+          quantity,
+          price: ticketPrice * quantity,
+          unit_price: ticketPrice,
+        } as any,
+      });
+      setSelectedEvent(null);
+      setQuantity(1);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Nav />
       <Hero />
-      <TrendingEvents />
+      <TrendingEvents onEventClick={(e) => { setSelectedEvent(e); setQuantity(1); }} />
       <LiquorAndVenues />
       <Organizers />
       <CTA />
       <Footer />
+
+      <EventDetailModal
+        event={selectedEvent}
+        quantity={quantity}
+        onQuantityChange={setQuantity}
+        onClose={() => setSelectedEvent(null)}
+        onCheckout={handleCheckout}
+      />
     </main>
   );
 }
