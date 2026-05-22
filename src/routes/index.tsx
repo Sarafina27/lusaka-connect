@@ -1,10 +1,22 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  EventData,
+  formatTicketPrice,
+  getTicketProgressInterval,
+  getTicketProgressPercent,
+  getTicketsAvailable,
+  useEventStore,
+} from "@/lib/event-store";
 import eventWarehouse from "@/assets/event-warehouse.jpg";
 import eventSunset from "@/assets/event-sunset.jpg";
 import eventConcert from "@/assets/event-concert.jpg";
+
+const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
+const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -17,69 +29,43 @@ const fadeUp = {
   transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
 };
 
-type Event = {
-  title: string;
-  venue: string;
-  when: string;
-  price: string;
-  badge: string;
-  image: string;
-  description?: string;
-  time?: string;
-};
-
-const trendingEvents: Event[] = [
-  {
-    title: "Warehouse Sessions",
-    venue: "Rhodes Park",
-    when: "Tonight · 22:00",
-    price: "ZMW 150",
-    badge: "MoMo Accepted",
-    image: eventWarehouse,
-    description: "High-energy warehouse sessions with electronic beats and live performers. Perfect for an unforgettable night.",
-  },
-  {
-    title: "Sunset Soirée at Latitude",
-    venue: "Leopard's Hill",
-    when: "Sat · 16:00",
-    price: "ZMW 450",
-    badge: "Limited Tickets",
-    image: eventSunset,
-    description: "Elegant sunset experience with cocktails, live music, and breathtaking views of Lusaka.",
-  },
-  {
-    title: "Echoes of the Copperbelt",
-    venue: "Showgrounds",
-    when: "Sun · 19:00",
-    price: "ZMW 200",
-    badge: "Verified Organizer",
-    image: eventConcert,
-    description: "Celebrating the sounds and culture of Zambia's mining region with live performances.",
-  },
-];
+type Event = EventData;
 
 function Nav() {
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setAuthEmail(window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY));
+  }, []);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CLIENT_AUTH_STORAGE_KEY);
+    }
+    navigate({ to: "/login" });
+  };
+
   return (
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <span className="font-extrabold tracking-tighter text-xl italic uppercase">
-            Kuwala
-          </span>
+          <span className="font-extrabold tracking-tighter text-xl italic uppercase">Kuwala</span>
           <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
             <Link to="/events" className="text-foreground transition-colors">Events</Link>
             <Link to="/venues" className="hover:text-foreground transition-colors">Venues</Link>
-            <Link to="/venues" className="hover:text-foreground transition-colors">Liquor Stores</Link>
-            <Link to="/organizers" className="hover:text-foreground transition-colors">Organizers</Link>
+            <Link to="/calendar" className="hover:text-foreground transition-colors">Calendar</Link>
           </div>
         </div>
+
         <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors">
-            Organizer Login
-          </Link>
-          <Link to="/signup" className="text-sm font-semibold px-5 py-2 rounded-full bg-foreground text-background hover:bg-accent hover:text-accent-foreground transition-colors">
-            Sign Up
-          </Link>
+          {authEmail ? (
+            <>
+              <Link to="/profile" className="hidden sm:inline-flex text-sm font-medium px-4 py-2 rounded-full border border-border hover:bg-white/5 transition-colors">Profile</Link>
+              <button onClick={handleLogout} className="text-sm font-semibold px-5 py-2 rounded-full bg-destructive text-background hover:opacity-90 transition-colors">Logout</button>
+            </>
+          ) : null}
         </div>
       </div>
     </nav>
@@ -91,7 +77,7 @@ function Hero() {
     <section className="relative pt-20 pb-16 overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-40 -right-32 h-[480px] w-[480px] rounded-full blur-3xl"
+        className="pointer-events-none absolute -top-40 -right-32 h-120 w-120 rounded-full blur-3xl"
         style={{ background: "radial-gradient(circle, var(--color-accent) 0%, transparent 60%)", opacity: 0.12 }}
       />
       <div className="max-w-7xl mx-auto px-6">
@@ -156,7 +142,9 @@ function EventDetailModal({
 }) {
   if (!event) return null;
 
-  const totalPrice = parseInt(event.price.replace(/\D/g, "")) * quantity;
+  const available = getTicketsAvailable(event);
+  const soldPercent = getTicketProgressPercent(event);
+  const totalPrice = event.price * quantity;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -224,14 +212,21 @@ function EventDetailModal({
                 </div>
               </div>
 
-              <div className="space-y-2 mb-4 text-sm">
+              <div className="space-y-4 mb-4 text-sm">
+                <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                  <span>{getTicketProgressInterval(event)}% sold</span>
+                  <span>{available} tickets left</span>
+                </div>
+                <div className="h-2 rounded-full bg-border overflow-hidden mb-2">
+                  <div className="h-full rounded-full bg-accent" style={{ width: `${soldPercent}%` }} />
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Price per ticket</span>
-                  <span>{event.price}</span>
+                  <span>{formatTicketPrice(event.price)}</span>
                 </div>
                 <div className="flex justify-between font-semibold text-lg border-t border-border pt-2">
                   <span>Total</span>
-                  <span className="text-accent">ZMW {totalPrice.toLocaleString()}</span>
+                  <span className="text-accent">{formatTicketPrice(totalPrice)}</span>
                 </div>
               </div>
 
@@ -250,12 +245,14 @@ function EventDetailModal({
 }
 
 function TrendingEvents({
+  events,
   onEventClick,
 }: {
+  events: Event[];
   onEventClick: (event: Event) => void;
 }) {
   return (
-    <section id="events" className="py-12 bg-white/[0.02] border-y border-border">
+    <section id="events" className="py-12 bg-white/2 border-y border-border">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           {...fadeUp}
@@ -268,7 +265,7 @@ function TrendingEvents({
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {trendingEvents.map((e, i) => (
+          {events.map((e, i) => (
             <motion.article
               key={e.title}
               initial={{ opacity: 0, y: 20 }}
@@ -279,7 +276,7 @@ function TrendingEvents({
               onClick={() => onEventClick(e)}
               className="group cursor-pointer"
             >
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden mb-4 ring-1 ring-white/10">
+              <div className="relative aspect-4/5 rounded-2xl overflow-hidden mb-4 ring-1 ring-white/10">
                 <img
                   src={e.image}
                   alt={e.title}
@@ -288,7 +285,7 @@ function TrendingEvents({
                   loading={i === 0 ? "eager" : "lazy"}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/0 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-background/80 via-background/0 to-transparent" />
                 <div className="absolute top-4 right-4">
                   <span className="bg-white/10 backdrop-blur-md border border-white/20 text-foreground text-[10px] font-mono px-2 py-1 rounded">
                     {e.badge.toUpperCase()}
@@ -296,12 +293,18 @@ function TrendingEvents({
                 </div>
               </div>
               <div className="flex justify-between items-start mb-1 gap-3">
-                <h3 className="font-bold text-lg group-hover:text-accent transition-colors">
-                  {e.title}
-                </h3>
+                <div>
+                  <h3 className="font-bold text-lg group-hover:text-accent transition-colors">
+                    {e.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{e.venue} · {e.when}</p>
+                </div>
                 <span className="font-mono text-accent shrink-0">{e.price}</span>
               </div>
-              <p className="text-sm text-muted-foreground">{e.venue} · {e.when}</p>
+              <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                <Badge variant="secondary">{e.badge}</Badge>
+                <span>{getTicketProgressInterval(e)}% sold</span>
+              </div>
             </motion.article>
           ))}
         </div>
@@ -381,44 +384,6 @@ function LiquorAndVenues() {
   );
 }
 
-function Organizers() {
-  return (
-    <section id="organizers" className="py-12 border-b border-border">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest shrink-0">
-            Trusted Organizers
-          </p>
-          <div className="flex gap-6 items-center">
-            {[
-              { name: "The Lab Zambia", tier: "Partner" },
-              { name: "R&B Sundays", tier: "Verified" },
-              { name: "Circuit Nights", tier: "Verified" },
-              { name: "Afro Roots Co.", tier: "Partner" },
-            ].map((o) => (
-              <div key={o.name} className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-full bg-white/10 grid place-items-center">
-                  <div className="w-4 h-4 rounded-full bg-accent/40" />
-                </div>
-                <span className="text-sm font-semibold">{o.name}</span>
-                <span
-                  className={
-                    "text-[10px] px-1.5 py-0.5 rounded border " +
-                    (o.tier === "Partner"
-                      ? "bg-accent/10 text-accent border-accent/20"
-                      : "bg-white/10 text-foreground border-white/20")
-                  }
-                >
-                  {o.tier.toUpperCase()}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function CTA() {
   return (
@@ -429,11 +394,11 @@ function CTA() {
         </motion.h2>
         <motion.p {...fadeUp} className="text-muted-foreground mb-8 max-w-xl mx-auto">
           Verified payouts via Mobile Money or Card. Encrypted QR tickets. Live entry scanning.
-          Real analytics. Built for Zambian organizers.
+          Real analytics for every Lusaka event.
         </motion.p>
         <motion.div {...fadeUp} className="flex flex-wrap gap-3 justify-center">
-          <Link to="/organizers" className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
-            Create Organizer Account
+          <Link to="/payouts" className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
+            View event management tools
           </Link>
           <Link to="/payouts" className="px-6 py-3 rounded-full border border-border text-sm font-medium text-center hover:bg-white/5 transition-colors">
             How payouts work
@@ -488,14 +453,35 @@ function Footer() {
   );
 }
 
+const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
+
 function Index() {
+  const { events } = useEventStore();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [authorized, setAuthorized] = useState<boolean | null>(() => {
+    if (typeof window === "undefined") return null;
+    return Boolean(window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY));
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY);
+    if (!saved) {
+      navigate({ to: "/login" });
+      return;
+    }
+    setAuthorized(true);
+  }, [navigate]);
+
+  if (authorized === null) {
+    return null;
+  }
 
   const handleCheckout = () => {
     if (selectedEvent) {
-      const ticketPrice = parseInt(selectedEvent.price.replace(/\D/g, ""));
+      const ticketPrice = selectedEvent.price;
       navigate({
         to: "/checkout",
         search: {
@@ -514,9 +500,8 @@ function Index() {
     <main className="min-h-screen bg-background text-foreground">
       <Nav />
       <Hero />
-      <TrendingEvents onEventClick={(e) => { setSelectedEvent(e); setQuantity(1); }} />
+      <TrendingEvents events={events} onEventClick={(e) => { setSelectedEvent(e); setQuantity(1); }} />
       <LiquorAndVenues />
-      <Organizers />
       <CTA />
       <Footer />
 

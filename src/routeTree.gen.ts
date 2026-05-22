@@ -11,12 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VenuesRouteImport } from './routes/venues'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PayoutsRouteImport } from './routes/payouts'
 import { Route as OrganizersRouteImport } from './routes/organizers'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventsPrivateRouteImport } from './routes/events/private'
@@ -32,6 +34,11 @@ const VenuesRoute = VenuesRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PayoutsRoute = PayoutsRouteImport.update({
@@ -62,6 +69,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -97,6 +109,7 @@ const EventsChillRoute = EventsChillRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
   '/checkout': typeof CheckoutRoute
   '/events': typeof EventsRouteWithChildren
@@ -104,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
   '/signup': typeof SignupRoute
+  '/profile': typeof ProfileRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -113,12 +127,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
   '/checkout': typeof CheckoutRoute
   '/login': typeof LoginRoute
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
   '/signup': typeof SignupRoute
+  '/profile': typeof ProfileRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -129,6 +145,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/calendar': typeof CalendarRoute
   '/checkout': typeof CheckoutRoute
   '/events': typeof EventsRouteWithChildren
@@ -136,6 +153,7 @@ export interface FileRoutesById {
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
   '/signup': typeof SignupRoute
+  '/profile': typeof ProfileRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -147,6 +165,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/calendar'
     | '/checkout'
     | '/events'
@@ -154,6 +173,7 @@ export interface FileRouteTypes {
     | '/organizers'
     | '/payouts'
     | '/signup'
+      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -163,12 +183,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/calendar'
     | '/checkout'
     | '/login'
     | '/organizers'
     | '/payouts'
     | '/signup'
+      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -178,6 +200,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/calendar'
     | '/checkout'
     | '/events'
@@ -185,6 +208,7 @@ export interface FileRouteTypes {
     | '/organizers'
     | '/payouts'
     | '/signup'
+      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -195,6 +219,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CalendarRoute: typeof CalendarRoute
   CheckoutRoute: typeof CheckoutRoute
   EventsRoute: typeof EventsRouteWithChildren
@@ -202,6 +227,7 @@ export interface RootRouteChildren {
   OrganizersRoute: typeof OrganizersRoute
   PayoutsRoute: typeof PayoutsRoute
   SignupRoute: typeof SignupRoute
+  ProfileRoute: typeof ProfileRoute
   VenuesRoute: typeof VenuesRoute
 }
 
@@ -261,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -329,6 +362,7 @@ const EventsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CalendarRoute: CalendarRoute,
   CheckoutRoute: CheckoutRoute,
   EventsRoute: EventsRouteWithChildren,
@@ -336,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrganizersRoute: OrganizersRoute,
   PayoutsRoute: PayoutsRoute,
   SignupRoute: SignupRoute,
+  ProfileRoute: ProfileRoute,
   VenuesRoute: VenuesRoute,
 }
 export const routeTree = rootRouteImport
