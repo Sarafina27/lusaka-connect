@@ -30,7 +30,7 @@ type AdminForm = {
 type AdminField = {
   label: string;
   key: keyof AdminForm;
-  type?: "select" | "date";
+  type?: "select" | "date" | "textarea";
   placeholder?: string;
   options?: AdminForm["category"][];
 };
@@ -38,6 +38,7 @@ type AdminField = {
 const ADMIN_FIELDS: AdminField[] = [
   { label: "Title", key: "title" },
   { label: "Venue", key: "venue" },
+  { label: "Description", key: "description", type: "textarea", placeholder: "Short event summary" },
   { label: "When", key: "when" },
   { label: "Date", key: "date", type: "date" },
   { label: "Time", key: "time" },
@@ -155,6 +156,19 @@ function AdminPage() {
       capacity: "100",
       sold: "0",
     });
+  };
+
+  const handleDelete = (event: EventData) => {
+    if (typeof window !== "undefined" && !window.confirm(`Delete "${event.title}"?`)) {
+      return;
+    }
+
+    removeEvent(event.id);
+    if (editingId === event.id) {
+      resetForm();
+    }
+    setMessage(`Deleted "${event.title}".`);
+    setStatus("authenticated");
   };
 
   const handleSubmit = () => {
@@ -300,12 +314,15 @@ function AdminPage() {
                           </div>
                           <h3 className="text-xl font-semibold mt-3">{event.title}</h3>
                           <p className="text-sm text-muted-foreground mt-1">{event.venue}</p>
+                          {event.description ? (
+                            <p className="mt-2 text-sm text-muted-foreground">{event.description}</p>
+                          ) : null}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <Button variant="outline" size="sm" onClick={() => startEditing(event)}>
                             <Edit3 className="mr-2 h-4 w-4" /> Edit
                           </Button>
-                          <Button variant="secondary" size="sm" onClick={() => removeEvent(event.id)}>
+                          <Button variant="secondary" size="sm" onClick={() => handleDelete(event)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </Button>
                         </div>
@@ -354,7 +371,7 @@ function AdminPage() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 {ADMIN_FIELDS.map((field) => (
-                  <label key={field.key} className="block">
+                  <label key={field.key} className={`block ${field.type === "textarea" ? "sm:col-span-2" : ""}`}>
                     <span className="text-sm font-medium text-muted-foreground">{field.label}</span>
                     {field.type === "select" ? (
                       <select
@@ -366,6 +383,14 @@ function AdminPage() {
                           <option key={option} value={option}>{option}</option>
                         ))}
                       </select>
+                    ) : field.type === "textarea" ? (
+                      <textarea
+                        value={form[field.key] as string}
+                        onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
+                        placeholder={field.placeholder ?? ""}
+                        rows={4}
+                        className="mt-2 w-full rounded-2xl border border-border bg-background px-4 py-3 outline-none focus:border-accent"
+                      />
                     ) : (
                       <input
                         type={field.key === "price" || field.key === "capacity" || field.key === "sold" ? "number" : field.key === "date" ? "date" : "text"}
