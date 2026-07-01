@@ -13,11 +13,46 @@ import {
 } from "@/lib/event-store";
 import eventWarehouse from "@/assets/event-warehouse.jpg";
 
+type AdminForm = {
+  title: string;
+  venue: string;
+  when: string;
+  time: string;
+  date: string;
+  description: string;
+  badge: string;
+  price: string;
+  category: EventData["category"];
+  capacity: string;
+  sold: string;
+};
+
+type AdminField = {
+  label: string;
+  key: keyof AdminForm;
+  type?: "select" | "date";
+  placeholder?: string;
+  options?: AdminForm["category"][];
+};
+
+const ADMIN_FIELDS: AdminField[] = [
+  { label: "Title", key: "title" },
+  { label: "Venue", key: "venue" },
+  { label: "When", key: "when" },
+  { label: "Date", key: "date", type: "date" },
+  { label: "Time", key: "time" },
+  { label: "Badge", key: "badge" },
+  { label: "Category", key: "category", type: "select", options: ["nightlife", "concert", "private", "chill"] },
+  { label: "Price", key: "price", placeholder: "150" },
+  { label: "Capacity", key: "capacity", placeholder: "200" },
+  { label: "Sold", key: "sold", placeholder: "0" },
+];
+
 const ADMIN_AUTH_STORAGE_KEY = "kuwala-admin-auth";
-const ADMIN_EMAILS: string[] = (import.meta.env.VITE_ADMIN_EMAIL || "admin@kuwala.com")
+const ADMIN_EMAILS: string[] = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@kuwala.com")
   .split(",")
   .map((email: string) => email.trim().toLowerCase())
-  .filter(Boolean);
+  .filter(Boolean));
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -35,11 +70,12 @@ function AdminPage() {
   const [status, setStatus] = useState<"idle" | "authenticated" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<AdminForm>({
     title: "",
     venue: "",
     when: "",
     time: "",
+    date: new Date().toISOString().slice(0, 10),
     description: "",
     badge: "",
     price: "0",
@@ -80,6 +116,13 @@ function AdminPage() {
     setMessage("Logged out.");
   };
 
+  const handleFieldChange = (key: keyof AdminForm, value: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: key === "category" ? (value as AdminForm["category"]) : value,
+    }));
+  };
+
   const startEditing = (event: EventData) => {
     setEditingId(event.id);
     setForm({
@@ -87,6 +130,7 @@ function AdminPage() {
       venue: event.venue,
       when: event.when,
       time: event.time,
+      date: event.date.slice(0, 10),
       description: event.description,
       badge: event.badge,
       price: String(event.price),
@@ -103,6 +147,7 @@ function AdminPage() {
       venue: "",
       when: "",
       time: "",
+      date: new Date().toISOString().slice(0, 10),
       description: "",
       badge: "",
       price: "0",
@@ -116,9 +161,16 @@ function AdminPage() {
     const parsedPrice = Number(form.price);
     const parsedCapacity = Number(form.capacity);
     const parsedSold = Number(form.sold);
+    const parsedDate = new Date(form.date);
 
     if (!form.title || !form.venue) {
       setMessage("Please complete the event title and venue.");
+      setStatus("error");
+      return;
+    }
+
+    if (!form.date || isNaN(parsedDate.getTime())) {
+      setMessage("Please select a valid event date.");
       setStatus("error");
       return;
     }
@@ -134,6 +186,7 @@ function AdminPage() {
       venue: form.venue,
       when: form.when,
       time: form.time,
+      date: parsedDate.toISOString(),
       description: form.description,
       badge: form.badge,
       price: parsedPrice,
@@ -300,22 +353,12 @@ function AdminPage() {
               </div>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                {[
-                  { label: "Title", key: "title" },
-                  { label: "Venue", key: "venue" },
-                  { label: "When", key: "when" },
-                  { label: "Time", key: "time" },
-                  { label: "Badge", key: "badge" },
-                  { label: "Category", key: "category", type: "select", options: ["nightlife", "concert", "private", "chill"] },
-                  { label: "Price", key: "price", placeholder: "150" },
-                  { label: "Capacity", key: "capacity", placeholder: "200" },
-                  { label: "Sold", key: "sold", placeholder: "0" },
-                ].map((field) => (
+                {ADMIN_FIELDS.map((field) => (
                   <label key={field.key} className="block">
                     <span className="text-sm font-medium text-muted-foreground">{field.label}</span>
                     {field.type === "select" ? (
                       <select
-                        value={(form as any)[field.key]}
+                        value={form[field.key]}
                         onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
                         className="mt-2 w-full rounded-2xl border border-border bg-background px-4 py-3 outline-none focus:border-accent"
                       >
@@ -325,8 +368,8 @@ function AdminPage() {
                       </select>
                     ) : (
                       <input
-                        type={field.key === "price" || field.key === "capacity" || field.key === "sold" ? "number" : "text"}
-                        value={(form as any)[field.key]}
+                        type={field.key === "price" || field.key === "capacity" || field.key === "sold" ? "number" : field.key === "date" ? "date" : "text"}
+                        value={form[field.key] as string}
                         onChange={(event) => setForm((prev) => ({ ...prev, [field.key]: event.target.value }))}
                         placeholder={field.placeholder ?? ""}
                         className="mt-2 w-full rounded-2xl border border-border bg-background px-4 py-3 outline-none focus:border-accent"

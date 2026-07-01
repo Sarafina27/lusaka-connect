@@ -116,8 +116,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
-  '/signup': typeof SignupRoute
   '/profile': typeof ProfileRoute
+  '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -133,8 +133,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
-  '/signup': typeof SignupRoute
   '/profile': typeof ProfileRoute
+  '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -152,8 +152,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/organizers': typeof OrganizersRoute
   '/payouts': typeof PayoutsRoute
-  '/signup': typeof SignupRoute
   '/profile': typeof ProfileRoute
+  '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
@@ -172,8 +172,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/organizers'
     | '/payouts'
+    | '/profile'
     | '/signup'
-      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -189,8 +189,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/organizers'
     | '/payouts'
+    | '/profile'
     | '/signup'
-      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -207,8 +207,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/organizers'
     | '/payouts'
+    | '/profile'
     | '/signup'
-      | '/profile'
     | '/venues'
     | '/events/chill'
     | '/events/concerts'
@@ -226,8 +226,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OrganizersRoute: typeof OrganizersRoute
   PayoutsRoute: typeof PayoutsRoute
-  SignupRoute: typeof SignupRoute
   ProfileRoute: typeof ProfileRoute
+  SignupRoute: typeof SignupRoute
   VenuesRoute: typeof VenuesRoute
 }
 
@@ -245,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payouts': {
@@ -369,8 +376,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OrganizersRoute: OrganizersRoute,
   PayoutsRoute: PayoutsRoute,
-  SignupRoute: SignupRoute,
   ProfileRoute: ProfileRoute,
+  SignupRoute: SignupRoute,
   VenuesRoute: VenuesRoute,
 }
 export const routeTree = rootRouteImport

@@ -10,6 +10,7 @@ export type EventData = {
   title: string;
   venue: string;
   when: string;
+  date: string;
   time: string;
   description: string;
   badge: string;
@@ -21,6 +22,13 @@ export type EventData = {
 };
 
 const STORAGE_KEY = "kuwala.events.v1";
+const today = new Date();
+const getEventDate = (offset: number) => {
+  const date = new Date(today);
+  date.setDate(date.getDate() + offset);
+  date.setHours(0, 0, 0, 0);
+  return date.toISOString();
+};
 
 export const DEFAULT_EVENTS: EventData[] = [
   {
@@ -28,6 +36,7 @@ export const DEFAULT_EVENTS: EventData[] = [
     title: "Warehouse Sessions",
     venue: "Rhodes Park",
     when: "Tonight · 22:00",
+    date: getEventDate(0),
     time: "22:00",
     description: "High-energy warehouse sessions with live performers and the latest beats.",
     badge: "MoMo Accepted",
@@ -42,6 +51,7 @@ export const DEFAULT_EVENTS: EventData[] = [
     title: "Sunset Soirée at Latitude",
     venue: "Leopard's Hill",
     when: "Sat · 16:00",
+    date: getEventDate(2),
     time: "16:00",
     description: "Elegant sunset experience with cocktails, live music, and breathtaking views.",
     badge: "Limited Tickets",
@@ -56,6 +66,7 @@ export const DEFAULT_EVENTS: EventData[] = [
     title: "Echoes of the Copperbelt",
     venue: "Showgrounds",
     when: "Sun · 19:00",
+    date: getEventDate(3),
     time: "19:00",
     description: "A showcase of Zambia's rich cultural soundscape with live performances.",
     badge: "Verified Organizer",
@@ -102,7 +113,13 @@ function loadEventsFromStorage() {
     }
 
     const parsed = JSON.parse(stored) as EventData[];
-    return Array.isArray(parsed) ? parsed : DEFAULT_EVENTS;
+    if (Array.isArray(parsed)) {
+      return parsed.map((event) => ({
+        ...event,
+        date: event.date || getEventDate(0),
+      }));
+    }
+    return DEFAULT_EVENTS;
   } catch {
     return DEFAULT_EVENTS;
   }

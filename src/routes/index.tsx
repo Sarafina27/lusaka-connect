@@ -11,12 +11,12 @@ import {
   getTicketsAvailable,
   useEventStore,
 } from "@/lib/event-store";
+import { addBooking } from "@/lib/bookings";
 import eventWarehouse from "@/assets/event-warehouse.jpg";
 import eventSunset from "@/assets/event-sunset.jpg";
 import eventConcert from "@/assets/event-concert.jpg";
 
 const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
-const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -133,12 +133,14 @@ function EventDetailModal({
   onQuantityChange,
   onClose,
   onCheckout,
+  onRsvp,
 }: {
   event: Event | null;
   quantity: number;
   onQuantityChange: (q: number) => void;
   onClose: () => void;
   onCheckout: () => void;
+  onRsvp: () => void;
 }) {
   if (!event) return null;
 
@@ -230,12 +232,20 @@ function EventDetailModal({
                 </div>
               </div>
 
-              <button
-                onClick={onCheckout}
-                className="w-full py-3 bg-foreground text-background rounded-full font-bold hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Proceed to Checkout
-              </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={onCheckout}
+                  className="w-full py-3 bg-foreground text-background rounded-full font-bold hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  Proceed to Checkout
+                </button>
+                <button
+                  onClick={onRsvp}
+                  className="w-full py-3 rounded-full border border-border bg-background text-foreground font-semibold hover:bg-white/5 transition-colors"
+                >
+                  RSVP for this event
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -324,31 +334,71 @@ function LiquorAndVenues() {
           </h4>
           <div className="space-y-3">
             {[
-              { name: "Manda Hill Bottle Shop", area: "1.2 km · Rhodes Park", open: true, hours: "Open until 00:00" },
-              { name: "Pick n Pay Liquor", area: "2.8 km · Woodlands", open: false, hours: "Closed" },
-              { name: "Cheers Woodlands", area: "3.4 km · Woodlands", open: true, hours: "Open until 22:00" },
+              {
+                name: "Manda Hill Bottle Shop",
+                area: "1.2 km · Rhodes Park",
+                open: true,
+                hours: "Open until 00:00",
+                phone: "+260966123456",
+                mapQuery: "Manda Hill Bottle Shop Lusaka",
+              },
+              {
+                name: "Pick n Pay Liquor",
+                area: "2.8 km · Woodlands",
+                open: false,
+                hours: "Closed",
+                phone: "+260976987654",
+                mapQuery: "Pick n Pay Liquor Woodlands Lusaka",
+              },
+              {
+                name: "Cheers Woodlands",
+                area: "3.4 km · Woodlands",
+                open: true,
+                hours: "Open until 22:00",
+                phone: "+260955246810",
+                mapQuery: "Cheers Woodlands Lusaka",
+              },
             ].map((s) => (
               <div
                 key={s.name}
                 className={
-                  "flex items-center justify-between p-4 rounded-xl border border-border hover:border-white/20 transition-colors " +
+                  "rounded-3xl border border-border bg-card/50 p-4 transition-colors " +
                   (s.open ? "" : "opacity-60")
                 }
               >
-                <div>
-                  <p className="font-bold">{s.name}</p>
-                  <p className="text-xs text-muted-foreground">{s.area}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-lg">{s.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{s.area}</p>
+                  </div>
+                  <span
+                    className={
+                      "px-2 py-1 rounded-full text-[10px] font-bold uppercase " +
+                      (s.open
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : "bg-red-500/10 text-red-400")
+                    }
+                  >
+                    {s.open ? "Open" : "Closed"}
+                  </span>
                 </div>
-                <span
-                  className={
-                    "px-2 py-1 rounded text-[10px] font-bold " +
-                    (s.open
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-red-500/10 text-red-400")
-                  }
-                >
-                  {s.hours.toUpperCase()}
-                </span>
+                <p className="mt-3 text-sm text-muted-foreground">{s.hours}</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.mapQuery)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold text-foreground hover:bg-white/5 transition-colors"
+                  >
+                    View map
+                  </a>
+                  <a
+                    href={`tel:${s.phone}`}
+                    className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-xs font-semibold text-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
+                    Call store
+                  </a>
+                </div>
               </div>
             ))}
           </div>
@@ -397,7 +447,7 @@ function CTA() {
           Real analytics for every Lusaka event.
         </motion.p>
         <motion.div {...fadeUp} className="flex flex-wrap gap-3 justify-center">
-          <Link to="/payouts" className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
+          <Link to="/organizers" className="px-6 py-3 rounded-full bg-foreground text-background text-sm font-bold text-center hover:bg-accent hover:text-accent-foreground transition-colors">
             View event management tools
           </Link>
           <Link to="/payouts" className="px-6 py-3 rounded-full border border-border text-sm font-medium text-center hover:bg-white/5 transition-colors">
@@ -453,12 +503,11 @@ function Footer() {
   );
 }
 
-const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
-
 function Index() {
   const { events } = useEventStore();
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [notification, setNotification] = useState<string | null>(null);
   const [authorized, setAuthorized] = useState<boolean | null>(() => {
     if (typeof window === "undefined") return null;
     return Boolean(window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY));
@@ -482,23 +531,64 @@ function Index() {
   const handleCheckout = () => {
     if (selectedEvent) {
       const ticketPrice = selectedEvent.price;
+      const searchParams = {
+        event: selectedEvent.title,
+        eventId: selectedEvent.id,
+        eventDate: selectedEvent.date,
+        eventTime: selectedEvent.time,
+        quantity,
+        price: ticketPrice * quantity,
+        unit_price: ticketPrice,
+      };
+
       navigate({
         to: "/checkout",
-        search: {
-          event: selectedEvent.title,
-          quantity,
-          price: ticketPrice * quantity,
-          unit_price: ticketPrice,
-        } as any,
+        search: searchParams,
       });
       setSelectedEvent(null);
       setQuantity(1);
     }
   };
 
+  const handleRsvp = () => {
+    if (!selectedEvent) return;
+    if (typeof window === "undefined") return;
+
+    const auth = window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY);
+    if (!auth) {
+      navigate({ to: "/login" });
+      return;
+    }
+
+    addBooking({
+      id: typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      userEmail: auth,
+      eventId: selectedEvent.id,
+      eventTitle: selectedEvent.title,
+      eventDate: selectedEvent.date,
+      eventTime: selectedEvent.time,
+      quantity: 0,
+      unitPrice: selectedEvent.price,
+      totalPrice: 0,
+      purchasedAt: new Date().toISOString(),
+      rsvp: true,
+    });
+
+    setNotification("This event has been added to your RSVPs.");
+    setSelectedEvent(null);
+    setQuantity(1);
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Nav />
+      {notification ? (
+        <div className="mx-auto max-w-7xl px-6 py-3 text-sm text-foreground bg-accent/10 border-b border-accent/20">
+          {notification}
+        </div>
+      ) : null}
       <Hero />
       <TrendingEvents events={events} onEventClick={(e) => { setSelectedEvent(e); setQuantity(1); }} />
       <LiquorAndVenues />
@@ -511,6 +601,7 @@ function Index() {
         onQuantityChange={setQuantity}
         onClose={() => setSelectedEvent(null)}
         onCheckout={handleCheckout}
+        onRsvp={handleRsvp}
       />
     </main>
   );
