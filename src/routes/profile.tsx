@@ -226,7 +226,7 @@ function ProfilePage() {
                     <Badge variant="outline" className="border-border">{dayBookings.length} events</Badge>
                   </div>
 
-                  <div className="mt-4 rounded-3xl border border-dashed border-border p-6 min-h-[220px]">
+                  <div className="mt-4 rounded-3xl border border-dashed border-border p-6 min-h-55">
                     {dayBookings.length === 0 ? (
                       <p className="text-sm text-muted-foreground">No bookings or RSVPs for this day yet.</p>
                     ) : (
@@ -327,6 +327,23 @@ function ProfilePage() {
                               </div>
                             ) : null}
                           </div>
+
+                          {!booking.rsvp && booking.ticketNumber ? (
+                            <div className="mt-4 rounded-3xl border border-border bg-card/50 p-4">
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Ticket pass</p>
+                                  <p className="mt-2 font-mono text-sm font-semibold">{booking.ticketNumber}</p>
+                                  <p className="mt-1 text-sm text-muted-foreground">
+                                    Sent to {booking.deliveryChannel === "sms" ? "phone" : "email"}: {booking.deliveryTarget ?? "your saved contact"}
+                                  </p>
+                                </div>
+                                {booking.qrCode ? (
+                                  <img src={booking.qrCode} alt="Ticket QR code" className="h-24 w-24 rounded-2xl border border-border bg-white p-2" />
+                                ) : null}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })

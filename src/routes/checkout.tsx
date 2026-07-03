@@ -1,9 +1,22 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { addBooking } from "@/lib/bookings";
+import { addBooking, buildTicketDelivery } from "@/lib/bookings";
 
 const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
+const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
+
+type ClientUser = { email: string; name: string; phone: string; password?: string };
+
+function loadClientUsers(): ClientUser[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = window.localStorage.getItem(CLIENT_USERS_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as ClientUser[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export const Route = createFileRoute("/checkout")({
   validateSearch: (search: Record<string, any>) => ({
@@ -34,6 +47,7 @@ function CheckoutPage() {
   const unit_price = Number(s.unit_price ?? 0);
   const [isComplete, setIsComplete] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [ticketDetails, setTicketDetails] = useState<ReturnType<typeof buildTicketDelivery> | null>(null);
   const navigate = useNavigate();
 
   const handleCompletePurchase = () => {
@@ -51,6 +65,13 @@ function CheckoutPage() {
       return;
     }
 
+    const users = loadClientUsers();
+    const buyer = users.find((user) => user.email === auth);
+    const phone = buyer?.phone?.trim();
+    const deliveryRecipient = phone ? phone : auth;
+    const deliveryChannel = phone ? "sms" : "email";
+    const delivery = buildTicketDelivery(deliveryRecipient, deliveryChannel);
+
     addBooking({
       id: typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
@@ -65,8 +86,13 @@ function CheckoutPage() {
       totalPrice: totalPrice,
       purchasedAt: new Date().toISOString(),
       rsvp: false,
+      ticketNumber: delivery.ticketNumber,
+      qrCode: delivery.qrCode,
+      deliveryChannel: delivery.deliveryChannel,
+      deliveryTarget: delivery.deliveryTarget,
     });
 
+    setTicketDetails(delivery);
     setIsComplete(true);
   };
 
@@ -88,6 +114,23 @@ function CheckoutPage() {
           <div className="rounded-3xl border border-accent bg-accent/10 p-10 text-center">
             <h2 className="text-3xl font-extrabold mb-4">Purchase complete</h2>
             <p className="text-muted-foreground mb-6">Your tickets are booked and saved to your profile. Head to your profile calendar to view them.</p>
+            {ticketDetails ? (
+              <div className="mx-auto mb-6 max-w-md rounded-3xl border border-border bg-background/80 p-6 text-left shadow-sm">
+                <div className="flex flex-col items-center gap-4">
+                  <img src={ticketDetails.qrCode} alt="Ticket QR code" className="h-36 w-36 rounded-2xl border border-border bg-white p-2" />
+                  <div className="text-center">
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Ticket number</p>
+                    <p className="mt-1 font-mono text-lg font-semibold">{ticketDetails.ticketNumber}</p>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-2xl border border-border/60 bg-card/60 p-4 text-sm text-muted-foreground">
+                  <p>
+                    Ticket details were prepared for {ticketDetails.deliveryChannel === "sms" ? "your phone" : "your email"}: {ticketDetails.deliveryTarget}
+                  </p>
+                  <p className="mt-2">Show the QR code or ticket number at the venue entrance.</p>
+                </div>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 to="/profile"
