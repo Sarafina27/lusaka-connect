@@ -106,17 +106,23 @@ function Hero() {
             <div className="bg-white/5 border border-border rounded-full px-4 py-3 flex items-center gap-3">
               <span className="text-sm text-muted-foreground">Category:</span>
               <div className="flex gap-2 flex-wrap">
-                {["Nightlife", "Concerts", "Chill Spots", "Private"].map((c, i) => (
-                  <button
-                    key={c}
+                {[
+                  { label: "Nightlife", to: "/events/nightlife" },
+                  { label: "Concerts", to: "/events/concerts" },
+                  { label: "Chill Spots", to: "/events/chill" },
+                  { label: "Private", to: "/events/private" },
+                ].map((item, i) => (
+                  <Link
+                    key={item.label}
+                    to={item.to}
                     className={
                       i === 0
                         ? "px-3 py-1 rounded-full bg-foreground text-background text-xs font-bold"
                         : "px-3 py-1 rounded-full border border-border text-xs font-medium hover:border-white/20"
                     }
                   >
-                    {c}
-                  </button>
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             </div>

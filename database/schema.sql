@@ -53,7 +53,13 @@ CREATE TABLE IF NOT EXISTS bookings (
   qr_code TEXT DEFAULT NULL,
   delivery_channel ENUM('email', 'sms') NOT NULL,
   delivery_target VARCHAR(255) NOT NULL,
-  status ENUM('pending', 'paid', 'cancelled') NOT NULL DEFAULT 'paid',
+  status ENUM(
+'pending_payment',
+'paid',
+'cancelled',
+'refunded'
+)
+DEFAULT 'pending_payment'
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -93,6 +99,120 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
+);
+-- Stores Lusaka Connect commission earned from each payment
+CREATE TABLE IF NOT EXISTS commissions (
+  id VARCHAR(36) PRIMARY KEY,
+  payment_id VARCHAR(36) NOT NULL,
+  event_id VARCHAR(36) NOT NULL,
+
+  commission_rate DECIMAL(5,2) NOT NULL,
+  commission_amount DECIMAL(10,2) NOT NULL,
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+);
+
+
+-- Stores every wallet movement
+-- Credit = money added to organizer
+-- Debit = money withdrawn
+
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+  id VARCHAR(36) PRIMARY KEY,
+
+  organizer_id VARCHAR(36) NOT NULL,
+
+  type ENUM('credit','debit') NOT NULL,
+
+  amount DECIMAL(10,2) NOT NULL,
+
+  reference_type ENUM(
+    'ticket_sale',
+    'withdrawal',
+    'refund',
+    'adjustment'
+  ) NOT NULL,
+
+  reference_id VARCHAR(36) NOT NULL,
+
+  description VARCHAR(255),
+
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (organizer_id) REFERENCES users(id)
+  ON DELETE CASCADE
+);
+
+
+-- Organizer requests money withdrawal
+
+CREATE TABLE IF NOT EXISTS withdrawal_requests (
+
+  id VARCHAR(36) PRIMARY KEY,
+
+  organizer_id VARCHAR(36) NOT NULL,
+
+  amount DECIMAL(10,2) NOT NULL,
+
+  payment_method ENUM(
+    'bank',
+    'mobile_money'
+  ) NOT NULL,
+
+  account_name VARCHAR(255) NOT NULL,
+
+  account_number VARCHAR(128) NOT NULL,
+
+  status ENUM(
+    'pending',
+    'approved',
+    'rejected',
+    'paid'
+  ) DEFAULT 'pending',
+
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP,
+
+
+  FOREIGN KEY (organizer_id)
+  REFERENCES users(id)
+  ON DELETE CASCADE
+
+);
+
+
+-- Records actual payouts made by admin
+
+CREATE TABLE IF NOT EXISTS payouts (
+
+  id VARCHAR(36) PRIMARY KEY,
+
+  withdrawal_id VARCHAR(36) NOT NULL,
+
+  amount DECIMAL(10,2) NOT NULL,
+
+  payment_reference VARCHAR(128),
+
+  status ENUM(
+    'pending',
+    'completed',
+    'failed'
+  ) DEFAULT 'pending',
+
+  paid_at DATETIME DEFAULT NULL,
+
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+
+  FOREIGN KEY (withdrawal_id)
+  REFERENCES withdrawal_requests(id)
+  ON DELETE CASCADE
+
 );
 
 CREATE INDEX idx_events_category ON events(category_id);

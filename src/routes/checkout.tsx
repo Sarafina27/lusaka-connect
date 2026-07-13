@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { addBooking, buildTicketDelivery } from "@/lib/bookings";
+import { useEventStore } from "@/lib/event-store";
 
 const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
 const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
@@ -48,7 +49,10 @@ function CheckoutPage() {
   const [isComplete, setIsComplete] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [ticketDetails, setTicketDetails] = useState<ReturnType<typeof buildTicketDelivery> | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("MTN MoMo");
   const navigate = useNavigate();
+
+  const { buyTickets } = useEventStore();
 
   const handleCompletePurchase = () => {
     if (typeof window === "undefined") return;
@@ -90,8 +94,10 @@ function CheckoutPage() {
       qrCode: delivery.qrCode,
       deliveryChannel: delivery.deliveryChannel,
       deliveryTarget: delivery.deliveryTarget,
+      paymentMethod: selectedPaymentMethod,
     });
 
+    buyTickets(eventId, quantity);
     setTicketDetails(delivery);
     setIsComplete(true);
   };
@@ -181,15 +187,20 @@ function CheckoutPage() {
                     { name: "Credit/Debit Card", desc: "Visa, Mastercard", icon: "💳", active: true },
                     { name: "Bank Transfer", desc: "Direct bank deposit", icon: "🏦", active: false },
                   ].map((method) => (
-                    <div
+                    <button
                       key={method.name}
-                      className={`rounded-xl border-2 p-4 cursor-pointer transition-colors ${
+                      type="button"
+                      onClick={() => method.active && setSelectedPaymentMethod(method.name)}
+                      className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
                         method.active
-                          ? "border-accent bg-accent/5 hover:border-accent hover:bg-accent/10"
+                          ? selectedPaymentMethod === method.name
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-accent bg-accent/5 hover:border-accent hover:bg-accent/10"
                           : "border-border bg-background/50 opacity-50 cursor-not-allowed"
                       }`}
+                      disabled={!method.active}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
                           <span className="text-2xl">{method.icon}</span>
                           <div>
@@ -197,17 +208,15 @@ function CheckoutPage() {
                             <p className="text-sm text-muted-foreground">{method.desc}</p>
                           </div>
                         </div>
-                        {method.active && (
-                          <input
-                            type="radio"
-                            name="payment"
-                            defaultChecked={method.name === "MTN MoMo"}
-                            className="mt-1"
-                          />
+                        {method.active ? (
+                          <span className="text-sm font-semibold mt-1">
+                            {selectedPaymentMethod === method.name ? "Selected" : "Select"}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Coming soon</span>
                         )}
-                        {!method.active && <span className="text-xs text-muted-foreground">Coming soon</span>}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 

@@ -14,6 +14,7 @@ export type UserBooking = {
   qrCode?: string;
   deliveryChannel?: "email" | "sms";
   deliveryTarget?: string;
+  paymentMethod?: string;
 };
 
 const BOOKINGS_STORAGE_KEY = "kuwala.bookings.v1";

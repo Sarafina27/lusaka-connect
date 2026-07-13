@@ -76,6 +76,21 @@ export const DEFAULT_EVENTS: EventData[] = [
     capacity: 400,
     sold: 180,
   },
+  {
+    id: "e4",
+    title: "Kuwala x Lush Launch",
+    venue: "Riverside",
+    when: "Fri · 19:00",
+    date: getEventDate(4),
+    time: "19:00",
+    description: "Exclusive launch party with premium access, cocktail service, and live DJs.",
+    badge: "Invitation Only",
+    price: 350,
+    category: "private",
+    image: eventSunset,
+    capacity: 120,
+    sold: 48,
+  },
 ];
 
 export function getTicketsAvailable(event: EventData) {

@@ -159,14 +159,19 @@ function ProfilePage() {
       <main className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid gap-8 xl:grid-cols-[380px_1fr]">
           <aside className="rounded-3xl border border-border bg-card/50 p-8">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">My account</p>
                 <h1 className="mt-3 text-3xl font-extrabold">Profile</h1>
               </div>
-              <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" /> Logout
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link to="/" className="text-sm font-semibold text-accent transition hover:text-accent/80">
+                  ← Back to home
+                </Link>
+                <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" /> Logout
+                </Button>
+              </div>
             </div>
 
             <div className="mt-8 space-y-4">

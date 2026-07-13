@@ -25,6 +25,7 @@ import { Route as EventsPrivateRouteImport } from './routes/events/private'
 import { Route as EventsNightlifeRouteImport } from './routes/events/nightlife'
 import { Route as EventsConcertsRouteImport } from './routes/events/concerts'
 import { Route as EventsChillRouteImport } from './routes/events/chill'
+import { Route as EventsEventCategoryPageRouteImport } from './routes/events/EventCategoryPage'
 
 const VenuesRoute = VenuesRouteImport.update({
   id: '/venues',
@@ -106,6 +107,11 @@ const EventsChillRoute = EventsChillRouteImport.update({
   path: '/chill',
   getParentRoute: () => EventsRoute,
 } as any)
+const EventsEventCategoryPageRoute = EventsEventCategoryPageRouteImport.update({
+  id: '/EventCategoryPage',
+  path: '/EventCategoryPage',
+  getParentRoute: () => EventsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
+  '/events/EventCategoryPage': typeof EventsEventCategoryPageRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
   '/events/nightlife': typeof EventsNightlifeRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
+  '/events/EventCategoryPage': typeof EventsEventCategoryPageRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
   '/events/nightlife': typeof EventsNightlifeRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/venues': typeof VenuesRoute
+  '/events/EventCategoryPage': typeof EventsEventCategoryPageRoute
   '/events/chill': typeof EventsChillRoute
   '/events/concerts': typeof EventsConcertsRoute
   '/events/nightlife': typeof EventsNightlifeRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/venues'
+    | '/events/EventCategoryPage'
     | '/events/chill'
     | '/events/concerts'
     | '/events/nightlife'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/venues'
+    | '/events/EventCategoryPage'
     | '/events/chill'
     | '/events/concerts'
     | '/events/nightlife'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/signup'
     | '/venues'
+    | '/events/EventCategoryPage'
     | '/events/chill'
     | '/events/concerts'
     | '/events/nightlife'
@@ -345,10 +357,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsChillRouteImport
       parentRoute: typeof EventsRoute
     }
+    '/events/EventCategoryPage': {
+      id: '/events/EventCategoryPage'
+      path: '/EventCategoryPage'
+      fullPath: '/events/EventCategoryPage'
+      preLoaderRoute: typeof EventsEventCategoryPageRouteImport
+      parentRoute: typeof EventsRoute
+    }
   }
 }
 
 interface EventsRouteChildren {
+  EventsEventCategoryPageRoute: typeof EventsEventCategoryPageRoute
   EventsChillRoute: typeof EventsChillRoute
   EventsConcertsRoute: typeof EventsConcertsRoute
   EventsNightlifeRoute: typeof EventsNightlifeRoute
@@ -357,6 +377,7 @@ interface EventsRouteChildren {
 }
 
 const EventsRouteChildren: EventsRouteChildren = {
+  EventsEventCategoryPageRoute: EventsEventCategoryPageRoute,
   EventsChillRoute: EventsChillRoute,
   EventsConcertsRoute: EventsConcertsRoute,
   EventsNightlifeRoute: EventsNightlifeRoute,
