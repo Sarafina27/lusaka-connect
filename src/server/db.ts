@@ -1,5 +1,6 @@
 import "server-only";
 import mysql from "mysql2/promise";
+import type { RowDataPacket } from "mysql2";
 
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST!,
@@ -14,9 +15,9 @@ const pool = mysql.createPool({
 
 export default pool;
 
-export async function query<T = mysql.RowDataPacket[]>(
+export async function query<T = RowDataPacket[]>(
   sql: string,
-  params: unknown[] = []
+  params: any[] = []
 ): Promise<T> {
   const [rows] = await pool.execute(sql, params);
   return rows as T;
