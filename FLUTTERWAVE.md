@@ -6,7 +6,13 @@ The checkout uses Flutterwave's Standard hosted checkout. The secret key stays o
 
 Event prices are in ZMW. Checkout is deliberately disabled unless Flutterwave ZMW checkout has been enabled for your merchant account and `FLUTTERWAVE_ZMW_ENABLED=true` is set on the server.
 
-1. Configure the environment variables shown in `.env.example` on the server/deployment platform. Set `FLUTTERWAVE_ZMW_ENABLED=true` only after confirming ZMW support for your account. Keep `FLUTTERWAVE_CURRENCY=ZMW`.
+1. Configure these server-side environment variables on the deployment platform:
+   - `FLW_SECRET_KEY` — Flutterwave API secret key.
+   - `FLW_SECRET_HASH` — webhook secret hash from the Flutterwave dashboard.
+   - `FLUTTERWAVE_CURRENCY=ZMW`.
+   - `FLUTTERWAVE_ZMW_ENABLED=false` initially; set it to `true` only after confirming ZMW support for your merchant account.
+   - `APP_URL` — public HTTPS origin of the deployed application.
+   - `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_DATABASE` — MySQL connection settings.
 2. Set `APP_URL` to the public HTTPS origin of the deployed application.
 3. Run the updated `database/schema.sql` so the `payment_intents` table exists.
 4. In the Flutterwave dashboard, set your webhook secret hash to the same value as `FLW_SECRET_HASH` and register `https://<your-domain>/api/flutterwave/webhook` as the webhook URL.
