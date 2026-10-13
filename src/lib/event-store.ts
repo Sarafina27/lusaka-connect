@@ -21,7 +21,7 @@ export type EventData = {
   sold: number;
 };
 
-const STORAGE_KEY = "kuwala.events.v1";
+const STORAGE_KEY = "tiyenza.events.v1";
 const today = new Date();
 const getEventDate = (offset: number) => {
   const date = new Date(today);
@@ -78,7 +78,7 @@ export const DEFAULT_EVENTS: EventData[] = [
   },
   {
     id: "e4",
-    title: "Kuwala x Lush Launch",
+    title: "Tiyenza x Lush Launch",
     venue: "Riverside",
     when: "Fri · 19:00",
     date: getEventDate(4),

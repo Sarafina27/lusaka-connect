@@ -1,4 +1,4 @@
--- MySQL schema for Kuwala event platform
+﻿-- MySQL schema for Tiyenza event platform
 
 CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(36) PRIMARY KEY,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 'cancelled',
 'refunded'
 )
-DEFAULT 'pending_payment'
+DEFAULT 'pending_payment',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -100,6 +100,25 @@ CREATE TABLE IF NOT EXISTS payments (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS payment_intents (
+  id VARCHAR(36) PRIMARY KEY,
+  tx_ref VARCHAR(128) NOT NULL UNIQUE,
+  user_email VARCHAR(255) NOT NULL,
+  event_id VARCHAR(36) NOT NULL,
+  event_title VARCHAR(255) NOT NULL,
+  event_date DATETIME NOT NULL,
+  event_time VARCHAR(16) NOT NULL,
+  quantity INT UNSIGNED NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  total_price DECIMAL(10,2) NOT NULL,
+  status ENUM('pending', 'paid', 'failed') NOT NULL DEFAULT 'pending',
+  provider_reference VARCHAR(128) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_payment_intents_status (status)
+);
+
 -- Stores Lusaka Connect commission earned from each payment
 CREATE TABLE IF NOT EXISTS commissions (
   id VARCHAR(36) PRIMARY KEY,
@@ -222,3 +241,4 @@ CREATE INDEX idx_bookings_event ON bookings(event_id);
 CREATE INDEX idx_saved_events_user ON saved_events(user_id);
 CREATE INDEX idx_reviews_event ON reviews(event_id);
 CREATE INDEX idx_payments_status ON payments(status);
+

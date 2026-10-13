@@ -49,8 +49,8 @@ const ADMIN_FIELDS: AdminField[] = [
   { label: "Sold", key: "sold", placeholder: "0" },
 ];
 
-const ADMIN_AUTH_STORAGE_KEY = "kuwala-admin-auth";
-const ADMIN_EMAILS: string[] = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@kuwala.com")
+const ADMIN_AUTH_STORAGE_KEY = "tiyenza-admin-auth";
+const ADMIN_EMAILS: string[] = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@tiyenza.com")
   .split(",")
   .map((email: string) => email.trim().toLowerCase())
   .filter(Boolean));
@@ -58,8 +58,8 @@ const ADMIN_EMAILS: string[] = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@kuw
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Kuwala" },
-      { name: "description", content: "Admin-only event management for Kuwala." },
+      { title: "Admin — Tiyenza" },
+      { name: "description", content: "Admin-only event management for Tiyenza." },
     ],
   }),
   component: AdminPage,
@@ -232,7 +232,7 @@ function AdminPage() {
       <div className="max-w-6xl mx-auto px-6 py-20">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Kuwala Admin</h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Tiyenza Admin</h1>
             <p className="text-muted-foreground max-w-2xl">
               Hidden admin access for event inventory and ticket management. Use the approved admin email to log in.
             </p>
@@ -260,7 +260,7 @@ function AdminPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-accent"
-                  placeholder="admin@kuwala.com"
+                  placeholder="admin@tiyenza.com"
                 />
               </div>
               <div>

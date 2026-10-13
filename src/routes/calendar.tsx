@@ -14,13 +14,13 @@ import eventConcert from "@/assets/event-concert.jpg";
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Event Calendar — Kuwala Lusaka" },
+      { title: "Event Calendar — Tiyenza Lusaka" },
       {
         name: "description",
         content:
-          "Browse Lusaka events by date, track tickets you've booked, and manage your organizer schedule on Kuwala.",
+          "Browse Lusaka events by date, track tickets you've booked, and manage your organizer schedule on Tiyenza.",
       },
-      { property: "og:title", content: "Event Calendar — Kuwala Lusaka" },
+      { property: "og:title", content: "Event Calendar — Tiyenza Lusaka" },
       {
         property: "og:description",
         content: "Discover what's on in Lusaka, by the day.",
@@ -61,7 +61,7 @@ const discoverEvents: CalEvent[] = [
 
 const myTickets: CalEvent[] = [discoverEvents[0], discoverEvents[3]];
 const myOrganizing: CalEvent[] = [
-  { id: "o1", title: "Kuwala x Lush — Private Launch", venue: "Riverside", date: d(4, 19), time: "19:00", price: "Invite Only", badge: "Draft", image: eventSunset, category: "private" },
+  { id: "o1", title: "Tiyenza x Lush — Private Launch", venue: "Riverside", date: d(4, 19), time: "19:00", price: "Invite Only", badge: "Draft", image: eventSunset, category: "private" },
   { id: "o2", title: "Lusaka Night Market", venue: "East Park", date: d(9, 17), time: "17:00", price: "ZMW 50", badge: "Published", image: eventConcert, category: "chill" },
 ];
 
@@ -174,7 +174,7 @@ function CalendarPage() {
       <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="font-extrabold tracking-tighter text-xl italic uppercase">
-            Kuwala
+            Tiyenza
           </Link>
           <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
             <Link to="/" className="hover:text-foreground transition-colors">Home</Link>

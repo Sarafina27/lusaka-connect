@@ -3,7 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-const ADMIN_EMAILS = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@kuwala.com")
+const ADMIN_EMAILS = ((import.meta.env?.VITE_ADMIN_EMAIL || "admin@tiyenza.com")
   .split(",")
   .map((email: string) => email.trim().toLowerCase())
   .filter(Boolean));

@@ -7,8 +7,8 @@ import { LogOut, MapPin } from "lucide-react";
 import { useEventStore } from "@/lib/event-store";
 import { getBookingsForUser, UserBooking } from "@/lib/bookings";
 
-const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
-const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
+const CLIENT_AUTH_STORAGE_KEY = "tiyenza-client-auth";
+const CLIENT_USERS_STORAGE_KEY = "tiyenza-client-users";
 
 type ClientUser = { email: string; name: string; phone: string; password?: string };
 
@@ -42,8 +42,8 @@ function formatDate(date: Date) {
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Profile — Kuwala" },
-      { name: "description", content: "Manage your Kuwala account and view booked events." },
+      { title: "Profile — Tiyenza" },
+      { name: "description", content: "Manage your Tiyenza account and view booked events." },
     ],
   }),
   component: ProfilePage,

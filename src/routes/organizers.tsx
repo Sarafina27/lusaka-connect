@@ -44,7 +44,7 @@ const checklist = [
 export const Route = createFileRoute("/organizers")({
   head: () => ({
     meta: [
-      { title: "Organizers — Kuwala Lusaka" },
+      { title: "Organizers — Tiyenza Lusaka" },
       { name: "description", content: "Tools and resources for event organizers, from ticket sales to payout tracking." },
     ],
   }),

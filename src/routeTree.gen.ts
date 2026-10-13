@@ -26,6 +26,10 @@ import { Route as EventsNightlifeRouteImport } from './routes/events/nightlife'
 import { Route as EventsConcertsRouteImport } from './routes/events/concerts'
 import { Route as EventsChillRouteImport } from './routes/events/chill'
 import { Route as EventsEventCategoryPageRouteImport } from './routes/events/EventCategoryPage'
+import { Route as ApiPaychanguWebhookRouteImport } from './routes/api/paychangu/webhook'
+import { Route as ApiPaychanguVerifyRouteImport } from './routes/api/paychangu/verify'
+import { Route as ApiPaychanguInitiateRouteImport } from './routes/api/paychangu/initiate'
+import { Route as ApiPaychanguConfigRouteImport } from './routes/api/paychangu/config'
 
 const VenuesRoute = VenuesRouteImport.update({
   id: '/venues',
@@ -112,6 +116,26 @@ const EventsEventCategoryPageRoute = EventsEventCategoryPageRouteImport.update({
   path: '/EventCategoryPage',
   getParentRoute: () => EventsRoute,
 } as any)
+const ApiPaychanguWebhookRoute = ApiPaychanguWebhookRouteImport.update({
+  id: '/api/paychangu/webhook',
+  path: '/api/paychangu/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaychanguVerifyRoute = ApiPaychanguVerifyRouteImport.update({
+  id: '/api/paychangu/verify',
+  path: '/api/paychangu/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaychanguInitiateRoute = ApiPaychanguInitiateRouteImport.update({
+  id: '/api/paychangu/initiate',
+  path: '/api/paychangu/initiate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPaychanguConfigRoute = ApiPaychanguConfigRouteImport.update({
+  id: '/api/paychangu/config',
+  path: '/api/paychangu/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +155,10 @@ export interface FileRoutesByFullPath {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events/': typeof EventsIndexRoute
+  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
+  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
+  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
+  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,6 +177,10 @@ export interface FileRoutesByTo {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events': typeof EventsIndexRoute
+  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
+  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
+  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
+  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,6 +201,10 @@ export interface FileRoutesById {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events/': typeof EventsIndexRoute
+  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
+  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
+  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
+  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,6 +226,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events/'
+    | '/api/paychangu/config'
+    | '/api/paychangu/initiate'
+    | '/api/paychangu/verify'
+    | '/api/paychangu/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -208,6 +248,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events'
+    | '/api/paychangu/config'
+    | '/api/paychangu/initiate'
+    | '/api/paychangu/verify'
+    | '/api/paychangu/webhook'
   id:
     | '__root__'
     | '/'
@@ -227,6 +271,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events/'
+    | '/api/paychangu/config'
+    | '/api/paychangu/initiate'
+    | '/api/paychangu/verify'
+    | '/api/paychangu/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -241,6 +289,10 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
   VenuesRoute: typeof VenuesRoute
+  ApiPaychanguConfigRoute: typeof ApiPaychanguConfigRoute
+  ApiPaychanguInitiateRoute: typeof ApiPaychanguInitiateRoute
+  ApiPaychanguVerifyRoute: typeof ApiPaychanguVerifyRoute
+  ApiPaychanguWebhookRoute: typeof ApiPaychanguWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -364,6 +416,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventCategoryPageRouteImport
       parentRoute: typeof EventsRoute
     }
+    '/api/paychangu/webhook': {
+      id: '/api/paychangu/webhook'
+      path: '/api/paychangu/webhook'
+      fullPath: '/api/paychangu/webhook'
+      preLoaderRoute: typeof ApiPaychanguWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/paychangu/verify': {
+      id: '/api/paychangu/verify'
+      path: '/api/paychangu/verify'
+      fullPath: '/api/paychangu/verify'
+      preLoaderRoute: typeof ApiPaychanguVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/paychangu/initiate': {
+      id: '/api/paychangu/initiate'
+      path: '/api/paychangu/initiate'
+      fullPath: '/api/paychangu/initiate'
+      preLoaderRoute: typeof ApiPaychanguInitiateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/paychangu/config': {
+      id: '/api/paychangu/config'
+      path: '/api/paychangu/config'
+      fullPath: '/api/paychangu/config'
+      preLoaderRoute: typeof ApiPaychanguConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -400,6 +480,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
   VenuesRoute: VenuesRoute,
+  ApiPaychanguConfigRoute: ApiPaychanguConfigRoute,
+  ApiPaychanguInitiateRoute: ApiPaychanguInitiateRoute,
+  ApiPaychanguVerifyRoute: ApiPaychanguVerifyRoute,
+  ApiPaychanguWebhookRoute: ApiPaychanguWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

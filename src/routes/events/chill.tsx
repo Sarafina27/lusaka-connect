@@ -4,7 +4,7 @@ import EventCategoryPage from "@/components/EventCategoryPage";
 export const Route = createFileRoute("/events/chill")({
   head: () => ({
     meta: [
-      { title: "Chill Events — Kuwala Lusaka" },
+      { title: "Chill Events — Tiyenza Lusaka" },
       { name: "description", content: "Relaxing daytime and evening events in Lusaka" },
     ],
   }),

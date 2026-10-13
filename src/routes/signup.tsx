@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
-const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
+const CLIENT_AUTH_STORAGE_KEY = "tiyenza-client-auth";
+const CLIENT_USERS_STORAGE_KEY = "tiyenza-client-users";
 type ClientUser = { email: string; name: string; phone: string; password?: string };
 
 function loadClientUsers(): ClientUser[] {
@@ -28,8 +29,8 @@ function saveClientUsers(users: { email: string; name: string; phone: string }[]
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Sign Up — Kuwala" },
-      { name: "description", content: "Create a Kuwala account to browse and book events in Lusaka." },
+      { title: "Sign Up — Tiyenza" },
+      { name: "description", content: "Create a Tiyenza account to browse and book events in Lusaka." },
     ],
   }),
   component: SignupPage,
@@ -39,6 +40,7 @@ function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ function SignupPage() {
     <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-6 py-20 w-full">
         <div className="rounded-3xl border border-border bg-card/50 p-8">
-          <h1 className="text-3xl font-extrabold mb-2">Create your Kuwala account</h1>
+          <h1 className="text-3xl font-extrabold mb-2">Create your Tiyenza account</h1>
           <p className="text-sm text-muted-foreground mb-6">
             Sign up to discover events, buy tickets, and manage your booking history in Lusaka.
           </p>
@@ -103,13 +105,25 @@ function SignupPage() {
             </label>
             <label className="block">
               <span className="text-sm font-medium text-muted-foreground">Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-accent"
-                placeholder="Choose a password"
-              />
+              <div className="relative mt-2">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-border bg-background px-4 py-3 pr-12 text-foreground outline-none focus:border-accent"
+                  placeholder="Choose a password"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute inset-y-0 right-0 flex items-center px-4 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </label>
             <label className="block">
               <span className="text-sm font-medium text-muted-foreground">Phone</span>

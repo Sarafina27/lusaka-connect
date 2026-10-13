@@ -16,7 +16,7 @@ import eventWarehouse from "@/assets/event-warehouse.jpg";
 import eventSunset from "@/assets/event-sunset.jpg";
 import eventConcert from "@/assets/event-concert.jpg";
 
-const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
+const CLIENT_AUTH_STORAGE_KEY = "tiyenza-client-auth";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -51,7 +51,7 @@ function Nav() {
     <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <span className="font-extrabold tracking-tighter text-xl italic uppercase">Kuwala</span>
+          <span className="font-extrabold tracking-tighter text-xl italic uppercase">Tiyenza</span>
           <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
             <Link to="/events" className="text-foreground transition-colors">Events</Link>
             <Link to="/venues" className="hover:text-foreground transition-colors">Venues</Link>
@@ -471,7 +471,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="col-span-2">
           <span className="font-extrabold tracking-tighter text-2xl italic uppercase mb-4 block">
-            Kuwala
+            Tiyenza
           </span>
           <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
             Lusaka&apos;s social discovery platform. Secure ticketing, verified venues, and
@@ -499,7 +499,7 @@ function Footer() {
       </div>
       <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
         <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-          © 2026 Kuwala Experiences Ltd · Lusaka, Zambia
+          © 2026 Tiyenza Experiences Ltd · Lusaka, Zambia
         </p>
         <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
           Visa · Mastercard · MTN MoMo · Airtel Money

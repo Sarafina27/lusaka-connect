@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/venues")({
   head: () => ({
     meta: [
-      { title: "Venues — Kuwala Lusaka" },
+      { title: "Venues — Tiyenza Lusaka" },
       { name: "description", content: "Browse verified venues and event spaces throughout Lusaka." },
     ],
   }),

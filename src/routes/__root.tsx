@@ -72,9 +72,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Kuwala — Discover Lusaka's Nightlife & Events" },
+      { title: "Tiyenza — Discover Lusaka's Nightlife & Events" },
       { name: "description", content: "Discover, book and host the best parties, concerts, chill spots and venues across Lusaka. Secure tickets with mobile money or card." },
-      { property: "og:title", content: "Kuwala — Discover Lusaka's Nightlife & Events" },
+      { property: "og:title", content: "Tiyenza — Discover Lusaka's Nightlife & Events" },
       { property: "og:description", content: "Verified events, venues and nightlife across Zambia." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

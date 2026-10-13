@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { addBooking, buildTicketDelivery } from "@/lib/bookings";
+import { useCallback, useEffect, useState } from "react";
+import { addBooking, buildTicketDelivery, getBookingsForUser } from "@/lib/bookings";
 import { useEventStore } from "@/lib/event-store";
 
-const CLIENT_AUTH_STORAGE_KEY = "kuwala-client-auth";
-const CLIENT_USERS_STORAGE_KEY = "kuwala-client-users";
+const CLIENT_AUTH_STORAGE_KEY = "tiyenza-client-auth";
+const CLIENT_USERS_STORAGE_KEY = "tiyenza-client-users";
 
 type ClientUser = { email: string; name: string; phone: string; password?: string };
 
@@ -20,41 +20,175 @@ function loadClientUsers(): ClientUser[] {
 }
 
 export const Route = createFileRoute("/checkout")({
-  validateSearch: (search: Record<string, any>) => ({
-    event: search.event || "",
-    eventId: search.eventId || "",
-    eventDate: search.eventDate || "",
-    eventTime: search.eventTime || "",
+  validateSearch: (search: Record<string, unknown>) => ({
+    event: typeof search.event === "string" ? search.event : "",
+    eventId: typeof search.eventId === "string" ? search.eventId : "",
+    eventDate: typeof search.eventDate === "string" ? search.eventDate : "",
+    eventTime: typeof search.eventTime === "string" ? search.eventTime : "",
     quantity: Number(search.quantity) || 1,
     price: Number(search.price) || 0,
     unit_price: Number(search.unit_price) || 0,
   }),
   head: () => ({
     meta: [
-      { title: "Checkout — Kuwala Lusaka" },
-      { name: "description", content: "Complete your ticket purchase on Kuwala" },
+      { title: "Checkout — Tiyenza Lusaka" },
+      { name: "description", content: "Complete your ticket purchase on Tiyenza" },
     ],
   }),
   component: CheckoutPage,
 });
 
 function CheckoutPage() {
-  // useSearch's generic isn't the Router type here; coerce search values safely.
   const search = useSearch({ from: "/checkout" });
-  const s = search as Record<string, any>;
-  const { event, eventId, eventDate, eventTime } = s;
-  const quantity = Number(s.quantity ?? 1);
-  const totalPrice = Number(s.price ?? 0);
-  const unit_price = Number(s.unit_price ?? 0);
+  const { event, eventId, eventTime, quantity, price, unit_price } = search;
+  const totalPrice = price;
   const [isComplete, setIsComplete] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [ticketDetails, setTicketDetails] = useState<ReturnType<typeof buildTicketDelivery> | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("MTN MoMo");
+  const [paymentEnabled, setPaymentEnabled] = useState(false);
+  const [paymentAvailabilityMessage, setPaymentAvailabilityMessage] = useState(
+    "Checking PayChangu availability...",
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [pendingTxRef, setPendingTxRef] = useState<string | null>(null);
+  const [ticketDetails, setTicketDetails] = useState<ReturnType<typeof buildTicketDelivery> | null>(
+    null,
+  );
   const navigate = useNavigate();
 
   const { buyTickets } = useEventStore();
 
-  const handleCompletePurchase = () => {
+  const verifyPayment = useCallback(
+    async (txRef: string) => {
+      if (typeof window === "undefined") return;
+      setIsProcessing(true);
+      setMessage(null);
+      try {
+        const response = await fetch("/api/paychangu/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tx_ref: txRef }),
+        });
+        const result = (await response.json()) as {
+          status?: "pending" | "paid" | "failed";
+          error?: string;
+          email?: string;
+          eventId?: string;
+          eventTitle?: string;
+          eventDate?: string;
+          eventTime?: string;
+          quantity?: number;
+          unitPrice?: number;
+          totalPrice?: number;
+        };
+        if (!response.ok) throw new Error(result.error || "Unable to verify your payment.");
+
+        if (result.status === "pending") {
+          setMessage("Your payment is still processing. Check again in a moment.");
+          return;
+        }
+        if (result.status !== "paid" || !result.email || !result.eventId || !result.eventDate) {
+          setMessage("Payment was not completed. No tickets have been issued.");
+          setPendingTxRef(null);
+          return;
+        }
+
+        const auth = window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY)?.trim().toLowerCase();
+        if (!auth || auth !== result.email) {
+          setMessage("Sign in with the email used for payment to view your tickets.");
+          return;
+        }
+
+        const existing = getBookingsForUser(auth).find(
+          (booking) => booking.transactionReference === txRef,
+        );
+        if (existing) {
+          setTicketDetails({
+            ticketNumber: existing.ticketNumber ?? "",
+            qrCode: existing.qrCode ?? "",
+            deliveryChannel: existing.deliveryChannel ?? "email",
+            deliveryTarget: existing.deliveryTarget ?? auth,
+          });
+          setIsComplete(true);
+          setPendingTxRef(null);
+          return;
+        }
+
+        const user = loadClientUsers().find((item) => item.email === auth);
+        const phone = user?.phone?.trim();
+        const delivery = buildTicketDelivery(phone || auth, phone ? "sms" : "email");
+        addBooking({
+          id:
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          userEmail: auth,
+          eventId: result.eventId,
+          eventTitle: result.eventTitle || event,
+          eventDate: result.eventDate,
+          eventTime: result.eventTime || eventTime,
+          quantity: result.quantity || quantity,
+          unitPrice: result.unitPrice ?? unit_price,
+          totalPrice: result.totalPrice ?? totalPrice,
+          purchasedAt: new Date().toISOString(),
+          rsvp: false,
+          ticketNumber: delivery.ticketNumber,
+          qrCode: delivery.qrCode,
+          deliveryChannel: delivery.deliveryChannel,
+          deliveryTarget: delivery.deliveryTarget,
+          paymentMethod: "PayChangu",
+          transactionReference: txRef,
+        });
+        buyTickets(result.eventId, result.quantity || quantity);
+        setTicketDetails(delivery);
+        setIsComplete(true);
+        setPendingTxRef(null);
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Unable to verify your payment.");
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [buyTickets, event, eventTime, quantity, totalPrice, unit_price],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/paychangu/config")
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to check PayChangu availability.");
+        return (await response.json()) as { available: boolean; message: string | null };
+      })
+      .then((availability) => {
+        if (cancelled) return;
+        setPaymentEnabled(availability.available);
+        setPaymentAvailabilityMessage(
+          availability.message ?? "Secure payment is provided by PayChangu.",
+        );
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPaymentEnabled(false);
+        setPaymentAvailabilityMessage(
+          "PayChangu is currently unavailable. Please try again later.",
+        );
+      });
+
+    const params = new URLSearchParams(window.location.search);
+    const txRef = params.get("tx_ref");
+    if (params.get("payment") === "cancelled") {
+      setMessage("Payment was cancelled. No tickets have been issued.");
+    }
+    if (txRef) {
+      setPendingTxRef(txRef);
+      void verifyPayment(txRef);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [verifyPayment]);
+
+  const handleCompletePurchase = async () => {
     if (typeof window === "undefined") return;
 
     const auth = window.localStorage.getItem(CLIENT_AUTH_STORAGE_KEY);
@@ -63,43 +197,39 @@ function CheckoutPage() {
       navigate({ to: "/login" });
       return;
     }
-
-    if (!eventId || !eventDate) {
-      setMessage("Unable to confirm your booking. Please try again.");
+    if (!eventId) {
+      setMessage("Unable to confirm the event. Please return to the event page and try again.");
       return;
     }
 
-    const users = loadClientUsers();
-    const buyer = users.find((user) => user.email === auth);
-    const phone = buyer?.phone?.trim();
-    const deliveryRecipient = phone ? phone : auth;
-    const deliveryChannel = phone ? "sms" : "email";
-    const delivery = buildTicketDelivery(deliveryRecipient, deliveryChannel);
+    const buyer = loadClientUsers().find((user) => user.email === auth);
+    if (!buyer) {
+      setMessage("Your account details could not be loaded. Please sign in again.");
+      return;
+    }
 
-    addBooking({
-      id: typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      userEmail: auth,
-      eventId,
-      eventTitle: event,
-      eventDate,
-      eventTime,
-      quantity,
-      unitPrice: unit_price,
-      totalPrice: totalPrice,
-      purchasedAt: new Date().toISOString(),
-      rsvp: false,
-      ticketNumber: delivery.ticketNumber,
-      qrCode: delivery.qrCode,
-      deliveryChannel: delivery.deliveryChannel,
-      deliveryTarget: delivery.deliveryTarget,
-      paymentMethod: selectedPaymentMethod,
-    });
-
-    buyTickets(eventId, quantity);
-    setTicketDetails(delivery);
-    setIsComplete(true);
+    setIsProcessing(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/paychangu/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId,
+          quantity,
+          email: auth,
+          firstName: buyer.name.trim().split(/\s+/)[0] || "",
+          lastName: buyer.name.trim().split(/\s+/).slice(1).join(" ") || "",
+        }),
+      });
+      const result = (await response.json()) as { checkoutUrl?: string; error?: string };
+      if (!response.ok) throw new Error(result.error || "Unable to start your payment.");
+      if (!result.checkoutUrl) throw new Error("PayChangu did not return a checkout link.");
+      window.location.assign(result.checkoutUrl);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to start your payment.");
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -107,7 +237,9 @@ function CheckoutPage() {
       <div className="max-w-5xl mx-auto px-6 py-24">
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Checkout</h1>
-          <p className="text-muted-foreground max-w-2xl">Select your preferred payment method and complete your purchase.</p>
+          <p className="text-muted-foreground max-w-2xl">
+            Select your preferred payment method and complete your purchase.
+          </p>
         </div>
 
         {message ? (
@@ -119,19 +251,32 @@ function CheckoutPage() {
         {isComplete ? (
           <div className="rounded-3xl border border-accent bg-accent/10 p-10 text-center">
             <h2 className="text-3xl font-extrabold mb-4">Purchase complete</h2>
-            <p className="text-muted-foreground mb-6">Your tickets are booked and saved to your profile. Head to your profile calendar to view them.</p>
+            <p className="text-muted-foreground mb-6">
+              Your tickets are booked and saved to your profile. Head to your profile calendar to
+              view them.
+            </p>
             {ticketDetails ? (
               <div className="mx-auto mb-6 max-w-md rounded-3xl border border-border bg-background/80 p-6 text-left shadow-sm">
                 <div className="flex flex-col items-center gap-4">
-                  <img src={ticketDetails.qrCode} alt="Ticket QR code" className="h-36 w-36 rounded-2xl border border-border bg-white p-2" />
+                  <img
+                    src={ticketDetails.qrCode}
+                    alt="Ticket QR code"
+                    className="h-36 w-36 rounded-2xl border border-border bg-white p-2"
+                  />
                   <div className="text-center">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Ticket number</p>
-                    <p className="mt-1 font-mono text-lg font-semibold">{ticketDetails.ticketNumber}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                      Ticket number
+                    </p>
+                    <p className="mt-1 font-mono text-lg font-semibold">
+                      {ticketDetails.ticketNumber}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-5 rounded-2xl border border-border/60 bg-card/60 p-4 text-sm text-muted-foreground">
                   <p>
-                    Ticket details were prepared for {ticketDetails.deliveryChannel === "sms" ? "your phone" : "your email"}: {ticketDetails.deliveryTarget}
+                    Ticket details were prepared for{" "}
+                    {ticketDetails.deliveryChannel === "sms" ? "your phone" : "your email"}:{" "}
+                    {ticketDetails.deliveryTarget}
                   </p>
                   <p className="mt-2">Show the QR code or ticket number at the venue entrance.</p>
                 </div>
@@ -166,7 +311,9 @@ function CheckoutPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold text-lg">{event}</p>
-                      <p className="text-sm text-muted-foreground">Quantity: {quantity} ticket{quantity !== 1 ? 's' : ''}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {quantity} ticket{quantity !== 1 ? "s" : ""}
+                      </p>
                       <p className="text-sm text-muted-foreground">{eventTime}</p>
                     </div>
                     <span className="font-mono text-lg">ZMW {totalPrice.toLocaleString()}</span>
@@ -179,53 +326,32 @@ function CheckoutPage() {
               </div>
 
               <div className="rounded-2xl border border-border bg-card/50 p-6">
-                <h2 className="text-2xl font-extrabold mb-6">Payment Method</h2>
-                <div className="space-y-3">
-                  {[
-                    { name: "MTN MoMo", desc: "Mobile money transfer", icon: "📱", active: true },
-                    { name: "Airtel Money", desc: "Airtel mobile money", icon: "📞", active: true },
-                    { name: "Credit/Debit Card", desc: "Visa, Mastercard", icon: "💳", active: true },
-                    { name: "Bank Transfer", desc: "Direct bank deposit", icon: "🏦", active: false },
-                  ].map((method) => (
-                    <button
-                      key={method.name}
-                      type="button"
-                      onClick={() => method.active && setSelectedPaymentMethod(method.name)}
-                      className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
-                        method.active
-                          ? selectedPaymentMethod === method.name
-                            ? "border-foreground bg-foreground text-background"
-                            : "border-accent bg-accent/5 hover:border-accent hover:bg-accent/10"
-                          : "border-border bg-background/50 opacity-50 cursor-not-allowed"
-                      }`}
-                      disabled={!method.active}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          <span className="text-2xl">{method.icon}</span>
-                          <div>
-                            <p className="font-semibold text-lg">{method.name}</p>
-                            <p className="text-sm text-muted-foreground">{method.desc}</p>
-                          </div>
-                        </div>
-                        {method.active ? (
-                          <span className="text-sm font-semibold mt-1">
-                            {selectedPaymentMethod === method.name ? "Selected" : "Select"}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Coming soon</span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
+                <h2 className="text-2xl font-extrabold mb-3">Pay securely with PayChangu</h2>
+                <p className="text-sm text-muted-foreground">
+                  PayChangu will show the payment methods enabled for your account, including mobile
+                  money and cards.
+                </p>
+                <div className="mt-4 rounded-xl border border-border bg-background/60 p-4 text-sm text-muted-foreground">
+                  {paymentAvailabilityMessage}
                 </div>
 
                 <button
                   onClick={handleCompletePurchase}
+                  disabled={!paymentEnabled || isProcessing}
                   className="w-full mt-6 py-3 bg-foreground text-background rounded-full font-bold hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
-                  Complete Purchase
+                  {isProcessing ? "Please wait..." : "Continue to PayChangu"}
                 </button>
+                {pendingTxRef ? (
+                  <button
+                    type="button"
+                    onClick={() => void verifyPayment(pendingTxRef)}
+                    disabled={isProcessing}
+                    className="w-full mt-3 py-3 rounded-full border border-border font-semibold disabled:opacity-50"
+                  >
+                    Check payment status
+                  </button>
+                ) : null}
               </div>
             </motion.div>
 
@@ -236,7 +362,7 @@ function CheckoutPage() {
               className="space-y-6"
             >
               <div className="rounded-2xl border border-border bg-card/50 p-6">
-                <h3 className="font-extrabold mb-3">Why Kuwala?</h3>
+                <h3 className="font-extrabold mb-3">Why Tiyenza?</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>✓ Secure encrypted payments</li>
                   <li>✓ Instant ticket delivery</li>

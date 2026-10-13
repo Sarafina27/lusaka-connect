@@ -15,9 +15,10 @@ export type UserBooking = {
   deliveryChannel?: "email" | "sms";
   deliveryTarget?: string;
   paymentMethod?: string;
+  transactionReference?: string;
 };
 
-const BOOKINGS_STORAGE_KEY = "kuwala.bookings.v1";
+const BOOKINGS_STORAGE_KEY = "tiyenza.bookings.v1";
 
 function createTicketNumber() {
   const stamp = Date.now().toString(36).toUpperCase();
@@ -105,10 +106,13 @@ export function addBooking(booking: UserBooking) {
   return next;
 }
 
-export function addRsvp(booking: Omit<UserBooking, "id" | "purchasedAt" | "quantity" | "totalPrice">) {
-  const id = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+export function addRsvp(
+  booking: Omit<UserBooking, "id" | "purchasedAt" | "quantity" | "totalPrice">,
+) {
+  const id =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const next: UserBooking = {
     ...booking,
     id,

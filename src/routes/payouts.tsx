@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/payouts")({
   head: () => ({
     meta: [
-      { title: "Payouts — Kuwala Lusaka" },
-      { name: "description", content: "Learn how Kuwala organizers receive secure payouts for ticket sales." },
+      { title: "Payouts — Tiyenza Lusaka" },
+      { name: "description", content: "Learn how Tiyenza organizers receive secure payouts for ticket sales." },
     ],
   }),
   component: PayoutsPage,
@@ -17,7 +17,7 @@ function PayoutsPage() {
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Organizer Payouts</h1>
           <p className="text-muted-foreground max-w-2xl">
-            Kuwala pays organizers securely through MTN MoMo, Airtel Money, or bank transfers, with verified settlement tracking.
+            Tiyenza pays organizers securely through MTN MoMo, Airtel Money, or bank transfers, with verified settlement tracking.
           </p>
         </div>
 
