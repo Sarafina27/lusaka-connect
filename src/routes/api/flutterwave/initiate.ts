@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { initiatePayChanguCheckout, PayChanguError } from "@/server/paychangu";
+import { FlutterwaveError, initiateFlutterwaveCheckout } from "@/server/flutterwave";
 
-export const Route = createFileRoute("/api/paychangu/initiate")({
+export const Route = createFileRoute("/api/flutterwave/initiate")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -12,24 +12,26 @@ export const Route = createFileRoute("/api/paychangu/initiate")({
             typeof body.email !== "string" ||
             typeof body.firstName !== "string" ||
             typeof body.lastName !== "string" ||
-            typeof body.quantity !== "number"
+            typeof body.quantity !== "number" ||
+            (body.phoneNumber !== undefined && typeof body.phoneNumber !== "string")
           ) {
-            throw new PayChanguError("Invalid payment request.", 400);
+            throw new FlutterwaveError("Invalid payment request.", 400);
           }
 
-          const result = await initiatePayChanguCheckout({
+          const result = await initiateFlutterwaveCheckout({
             eventId: body.eventId,
             email: body.email,
             firstName: body.firstName,
             lastName: body.lastName,
             quantity: body.quantity,
+            phoneNumber: typeof body.phoneNumber === "string" ? body.phoneNumber : undefined,
           });
           return Response.json(result);
         } catch (error) {
-          if (error instanceof PayChanguError) {
+          if (error instanceof FlutterwaveError) {
             return Response.json({ error: error.message }, { status: error.statusCode });
           }
-          console.error("Unexpected PayChangu checkout error.", error);
+          console.error("Unexpected Flutterwave checkout error.", error);
           return Response.json({ error: "Unable to start payment." }, { status: 500 });
         }
       },

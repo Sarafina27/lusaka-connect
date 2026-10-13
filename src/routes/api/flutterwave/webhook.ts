@@ -1,21 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PayChanguError, verifyPayChanguWebhook } from "@/server/paychangu";
+import { FlutterwaveError, verifyFlutterwaveWebhook } from "@/server/flutterwave";
 
-export const Route = createFileRoute("/api/paychangu/webhook")({
+export const Route = createFileRoute("/api/flutterwave/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
-          const result = await verifyPayChanguWebhook(
-            await request.text(),
-            request.headers.get("Signature"),
-          );
+          const result = await verifyFlutterwaveWebhook(await request.text(), request);
           return Response.json({ received: true, status: result.status });
         } catch (error) {
-          if (error instanceof PayChanguError) {
+          if (error instanceof FlutterwaveError) {
             return Response.json({ error: error.message }, { status: error.statusCode });
           }
-          console.error("Unexpected PayChangu webhook error.", error);
+          console.error("Unexpected Flutterwave webhook error.", error);
           return Response.json({ error: "Unable to process payment webhook." }, { status: 500 });
         }
       },

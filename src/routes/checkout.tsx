@@ -46,10 +46,11 @@ function CheckoutPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [paymentEnabled, setPaymentEnabled] = useState(false);
   const [paymentAvailabilityMessage, setPaymentAvailabilityMessage] = useState(
-    "Checking PayChangu availability...",
+    "Checking Flutterwave availability...",
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingTxRef, setPendingTxRef] = useState<string | null>(null);
+  const [pendingTransactionId, setPendingTransactionId] = useState<string | null>(null);
   const [ticketDetails, setTicketDetails] = useState<ReturnType<typeof buildTicketDelivery> | null>(
     null,
   );
@@ -58,15 +59,15 @@ function CheckoutPage() {
   const { buyTickets } = useEventStore();
 
   const verifyPayment = useCallback(
-    async (txRef: string) => {
+    async (txRef: string, transactionId: string) => {
       if (typeof window === "undefined") return;
       setIsProcessing(true);
       setMessage(null);
       try {
-        const response = await fetch("/api/paychangu/verify", {
+        const response = await fetch("/api/flutterwave/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tx_ref: txRef }),
+          body: JSON.stringify({ tx_ref: txRef, transaction_id: transactionId }),
         });
         const result = (await response.json()) as {
           status?: "pending" | "paid" | "failed";
@@ -135,7 +136,7 @@ function CheckoutPage() {
           qrCode: delivery.qrCode,
           deliveryChannel: delivery.deliveryChannel,
           deliveryTarget: delivery.deliveryTarget,
-          paymentMethod: "PayChangu",
+          paymentMethod: "Flutterwave",
           transactionReference: txRef,
         });
         buyTickets(result.eventId, result.quantity || quantity);
@@ -153,34 +154,39 @@ function CheckoutPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/paychangu/config")
+    fetch("/api/flutterwave/config")
       .then(async (response) => {
-        if (!response.ok) throw new Error("Unable to check PayChangu availability.");
+        if (!response.ok) throw new Error("Unable to check Flutterwave availability.");
         return (await response.json()) as { available: boolean; message: string | null };
       })
       .then((availability) => {
         if (cancelled) return;
         setPaymentEnabled(availability.available);
         setPaymentAvailabilityMessage(
-          availability.message ?? "Secure payment is provided by PayChangu.",
+          availability.message ?? "Secure payment is provided by Flutterwave.",
         );
       })
       .catch(() => {
         if (cancelled) return;
         setPaymentEnabled(false);
         setPaymentAvailabilityMessage(
-          "PayChangu is currently unavailable. Please try again later.",
+          "Flutterwave is currently unavailable. Please try again later.",
         );
       });
 
     const params = new URLSearchParams(window.location.search);
     const txRef = params.get("tx_ref");
-    if (params.get("payment") === "cancelled") {
+    const transactionId = params.get("transaction_id");
+    if (params.get("status") === "cancelled" || params.get("status") === "failed") {
       setMessage("Payment was cancelled. No tickets have been issued.");
     }
-    if (txRef) {
+    if (txRef && transactionId) {
       setPendingTxRef(txRef);
-      void verifyPayment(txRef);
+      setPendingTransactionId(transactionId);
+      void verifyPayment(txRef, transactionId);
+    } else if (txRef) {
+      setMessage("Flutterwave did not return a transaction ID. Please check your payment status.");
+      setPendingTxRef(txRef);
     }
 
     return () => {
@@ -211,7 +217,7 @@ function CheckoutPage() {
     setIsProcessing(true);
     setMessage(null);
     try {
-      const response = await fetch("/api/paychangu/initiate", {
+      const response = await fetch("/api/flutterwave/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -220,11 +226,12 @@ function CheckoutPage() {
           email: auth,
           firstName: buyer.name.trim().split(/\s+/)[0] || "",
           lastName: buyer.name.trim().split(/\s+/).slice(1).join(" ") || "",
+          phoneNumber: buyer.phone,
         }),
       });
       const result = (await response.json()) as { checkoutUrl?: string; error?: string };
       if (!response.ok) throw new Error(result.error || "Unable to start your payment.");
-      if (!result.checkoutUrl) throw new Error("PayChangu did not return a checkout link.");
+      if (!result.checkoutUrl) throw new Error("Flutterwave did not return a checkout link.");
       window.location.assign(result.checkoutUrl);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to start your payment.");
@@ -326,10 +333,10 @@ function CheckoutPage() {
               </div>
 
               <div className="rounded-2xl border border-border bg-card/50 p-6">
-                <h2 className="text-2xl font-extrabold mb-3">Pay securely with PayChangu</h2>
+                <h2 className="text-2xl font-extrabold mb-3">Pay securely with Flutterwave</h2>
                 <p className="text-sm text-muted-foreground">
-                  PayChangu will show the payment methods enabled for your account, including mobile
-                  money and cards.
+                  Flutterwave will show the payment methods enabled for your account, including
+                  mobile money and cards.
                 </p>
                 <div className="mt-4 rounded-xl border border-border bg-background/60 p-4 text-sm text-muted-foreground">
                   {paymentAvailabilityMessage}
@@ -340,12 +347,12 @@ function CheckoutPage() {
                   disabled={!paymentEnabled || isProcessing}
                   className="w-full mt-6 py-3 bg-foreground text-background rounded-full font-bold hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
-                  {isProcessing ? "Please wait..." : "Continue to PayChangu"}
+                  {isProcessing ? "Please wait..." : "Continue to Flutterwave"}
                 </button>
-                {pendingTxRef ? (
+                {pendingTxRef && pendingTransactionId ? (
                   <button
                     type="button"
-                    onClick={() => void verifyPayment(pendingTxRef)}
+                    onClick={() => void verifyPayment(pendingTxRef, pendingTransactionId)}
                     disabled={isProcessing}
                     className="w-full mt-3 py-3 rounded-full border border-border font-semibold disabled:opacity-50"
                   >

@@ -26,10 +26,10 @@ import { Route as EventsNightlifeRouteImport } from './routes/events/nightlife'
 import { Route as EventsConcertsRouteImport } from './routes/events/concerts'
 import { Route as EventsChillRouteImport } from './routes/events/chill'
 import { Route as EventsEventCategoryPageRouteImport } from './routes/events/EventCategoryPage'
-import { Route as ApiPaychanguWebhookRouteImport } from './routes/api/paychangu/webhook'
-import { Route as ApiPaychanguVerifyRouteImport } from './routes/api/paychangu/verify'
-import { Route as ApiPaychanguInitiateRouteImport } from './routes/api/paychangu/initiate'
-import { Route as ApiPaychanguConfigRouteImport } from './routes/api/paychangu/config'
+import { Route as ApiFlutterwaveWebhookRouteImport } from './routes/api/flutterwave/webhook'
+import { Route as ApiFlutterwaveVerifyRouteImport } from './routes/api/flutterwave/verify'
+import { Route as ApiFlutterwaveInitiateRouteImport } from './routes/api/flutterwave/initiate'
+import { Route as ApiFlutterwaveConfigRouteImport } from './routes/api/flutterwave/config'
 
 const VenuesRoute = VenuesRouteImport.update({
   id: '/venues',
@@ -116,24 +116,24 @@ const EventsEventCategoryPageRoute = EventsEventCategoryPageRouteImport.update({
   path: '/EventCategoryPage',
   getParentRoute: () => EventsRoute,
 } as any)
-const ApiPaychanguWebhookRoute = ApiPaychanguWebhookRouteImport.update({
-  id: '/api/paychangu/webhook',
-  path: '/api/paychangu/webhook',
+const ApiFlutterwaveWebhookRoute = ApiFlutterwaveWebhookRouteImport.update({
+  id: '/api/flutterwave/webhook',
+  path: '/api/flutterwave/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPaychanguVerifyRoute = ApiPaychanguVerifyRouteImport.update({
-  id: '/api/paychangu/verify',
-  path: '/api/paychangu/verify',
+const ApiFlutterwaveVerifyRoute = ApiFlutterwaveVerifyRouteImport.update({
+  id: '/api/flutterwave/verify',
+  path: '/api/flutterwave/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPaychanguInitiateRoute = ApiPaychanguInitiateRouteImport.update({
-  id: '/api/paychangu/initiate',
-  path: '/api/paychangu/initiate',
+const ApiFlutterwaveInitiateRoute = ApiFlutterwaveInitiateRouteImport.update({
+  id: '/api/flutterwave/initiate',
+  path: '/api/flutterwave/initiate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPaychanguConfigRoute = ApiPaychanguConfigRouteImport.update({
-  id: '/api/paychangu/config',
-  path: '/api/paychangu/config',
+const ApiFlutterwaveConfigRoute = ApiFlutterwaveConfigRouteImport.update({
+  id: '/api/flutterwave/config',
+  path: '/api/flutterwave/config',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -155,10 +155,10 @@ export interface FileRoutesByFullPath {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events/': typeof EventsIndexRoute
-  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
-  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
-  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
-  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
+  '/api/flutterwave/config': typeof ApiFlutterwaveConfigRoute
+  '/api/flutterwave/initiate': typeof ApiFlutterwaveInitiateRoute
+  '/api/flutterwave/verify': typeof ApiFlutterwaveVerifyRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,10 +177,10 @@ export interface FileRoutesByTo {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events': typeof EventsIndexRoute
-  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
-  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
-  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
-  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
+  '/api/flutterwave/config': typeof ApiFlutterwaveConfigRoute
+  '/api/flutterwave/initiate': typeof ApiFlutterwaveInitiateRoute
+  '/api/flutterwave/verify': typeof ApiFlutterwaveVerifyRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -201,10 +201,10 @@ export interface FileRoutesById {
   '/events/nightlife': typeof EventsNightlifeRoute
   '/events/private': typeof EventsPrivateRoute
   '/events/': typeof EventsIndexRoute
-  '/api/paychangu/config': typeof ApiPaychanguConfigRoute
-  '/api/paychangu/initiate': typeof ApiPaychanguInitiateRoute
-  '/api/paychangu/verify': typeof ApiPaychanguVerifyRoute
-  '/api/paychangu/webhook': typeof ApiPaychanguWebhookRoute
+  '/api/flutterwave/config': typeof ApiFlutterwaveConfigRoute
+  '/api/flutterwave/initiate': typeof ApiFlutterwaveInitiateRoute
+  '/api/flutterwave/verify': typeof ApiFlutterwaveVerifyRoute
+  '/api/flutterwave/webhook': typeof ApiFlutterwaveWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -226,10 +226,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events/'
-    | '/api/paychangu/config'
-    | '/api/paychangu/initiate'
-    | '/api/paychangu/verify'
-    | '/api/paychangu/webhook'
+    | '/api/flutterwave/config'
+    | '/api/flutterwave/initiate'
+    | '/api/flutterwave/verify'
+    | '/api/flutterwave/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -248,10 +248,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events'
-    | '/api/paychangu/config'
-    | '/api/paychangu/initiate'
-    | '/api/paychangu/verify'
-    | '/api/paychangu/webhook'
+    | '/api/flutterwave/config'
+    | '/api/flutterwave/initiate'
+    | '/api/flutterwave/verify'
+    | '/api/flutterwave/webhook'
   id:
     | '__root__'
     | '/'
@@ -271,10 +271,10 @@ export interface FileRouteTypes {
     | '/events/nightlife'
     | '/events/private'
     | '/events/'
-    | '/api/paychangu/config'
-    | '/api/paychangu/initiate'
-    | '/api/paychangu/verify'
-    | '/api/paychangu/webhook'
+    | '/api/flutterwave/config'
+    | '/api/flutterwave/initiate'
+    | '/api/flutterwave/verify'
+    | '/api/flutterwave/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -289,10 +289,10 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
   VenuesRoute: typeof VenuesRoute
-  ApiPaychanguConfigRoute: typeof ApiPaychanguConfigRoute
-  ApiPaychanguInitiateRoute: typeof ApiPaychanguInitiateRoute
-  ApiPaychanguVerifyRoute: typeof ApiPaychanguVerifyRoute
-  ApiPaychanguWebhookRoute: typeof ApiPaychanguWebhookRoute
+  ApiFlutterwaveConfigRoute: typeof ApiFlutterwaveConfigRoute
+  ApiFlutterwaveInitiateRoute: typeof ApiFlutterwaveInitiateRoute
+  ApiFlutterwaveVerifyRoute: typeof ApiFlutterwaveVerifyRoute
+  ApiFlutterwaveWebhookRoute: typeof ApiFlutterwaveWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,32 +416,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventCategoryPageRouteImport
       parentRoute: typeof EventsRoute
     }
-    '/api/paychangu/webhook': {
-      id: '/api/paychangu/webhook'
-      path: '/api/paychangu/webhook'
-      fullPath: '/api/paychangu/webhook'
-      preLoaderRoute: typeof ApiPaychanguWebhookRouteImport
+    '/api/flutterwave/webhook': {
+      id: '/api/flutterwave/webhook'
+      path: '/api/flutterwave/webhook'
+      fullPath: '/api/flutterwave/webhook'
+      preLoaderRoute: typeof ApiFlutterwaveWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/paychangu/verify': {
-      id: '/api/paychangu/verify'
-      path: '/api/paychangu/verify'
-      fullPath: '/api/paychangu/verify'
-      preLoaderRoute: typeof ApiPaychanguVerifyRouteImport
+    '/api/flutterwave/verify': {
+      id: '/api/flutterwave/verify'
+      path: '/api/flutterwave/verify'
+      fullPath: '/api/flutterwave/verify'
+      preLoaderRoute: typeof ApiFlutterwaveVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/paychangu/initiate': {
-      id: '/api/paychangu/initiate'
-      path: '/api/paychangu/initiate'
-      fullPath: '/api/paychangu/initiate'
-      preLoaderRoute: typeof ApiPaychanguInitiateRouteImport
+    '/api/flutterwave/initiate': {
+      id: '/api/flutterwave/initiate'
+      path: '/api/flutterwave/initiate'
+      fullPath: '/api/flutterwave/initiate'
+      preLoaderRoute: typeof ApiFlutterwaveInitiateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/paychangu/config': {
-      id: '/api/paychangu/config'
-      path: '/api/paychangu/config'
-      fullPath: '/api/paychangu/config'
-      preLoaderRoute: typeof ApiPaychanguConfigRouteImport
+    '/api/flutterwave/config': {
+      id: '/api/flutterwave/config'
+      path: '/api/flutterwave/config'
+      fullPath: '/api/flutterwave/config'
+      preLoaderRoute: typeof ApiFlutterwaveConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -480,10 +480,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
   VenuesRoute: VenuesRoute,
-  ApiPaychanguConfigRoute: ApiPaychanguConfigRoute,
-  ApiPaychanguInitiateRoute: ApiPaychanguInitiateRoute,
-  ApiPaychanguVerifyRoute: ApiPaychanguVerifyRoute,
-  ApiPaychanguWebhookRoute: ApiPaychanguWebhookRoute,
+  ApiFlutterwaveConfigRoute: ApiFlutterwaveConfigRoute,
+  ApiFlutterwaveInitiateRoute: ApiFlutterwaveInitiateRoute,
+  ApiFlutterwaveVerifyRoute: ApiFlutterwaveVerifyRoute,
+  ApiFlutterwaveWebhookRoute: ApiFlutterwaveWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
